@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-background text-white font-sans antialiased;
+}
+
+/* Custom Scrollbar for "Bloomberg" feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-surface;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-hover rounded;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-secondary/50;
+}
+
+/* Animations */
+@keyframes scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+
+/* Large drift animations - tags move across significant portions of screen */
+@keyframes drift-1 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(150px, -100px); }
+  50% { transform: translate(300px, 50px); }
+  75% { transform: translate(100px, 150px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes drift-2 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-200px, 80px); }
+  50% { transform: translate(-100px, -120px); }
+  75% { transform: translate(80px, -50px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes drift-3 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(100px, 200px); }
+  50% { transform: translate(-150px, 100px); }
+  75% { transform: translate(-80px, -80px); }
+  100% { transform: translate(0, 0); }
+}
+
+@keyframes drift-4 {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-120px, -150px); }
+  50% { transform: translate(80px, -200px); }
+  75% { transform: translate(200px, 80px); }
+  100% { transform: translate(0, 0); }
+}
+
+.animate-drift-1 { animation: drift-1 25s ease-in-out infinite; }
+.animate-drift-2 { animation: drift-2 30s ease-in-out infinite; animation-delay: -5s; }
+.animate-drift-3 { animation: drift-3 28s ease-in-out infinite; animation-delay: -10s; }
+.animate-drift-4 { animation: drift-4 32s ease-in-out infinite; animation-delay: -15s; }
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+@keyframes fade-in-delayed {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 0.7; transform: translateY(0); }
+}
+.animate-fade-in-delayed {
+  animation: fade-in-delayed 1s ease-out forwards;
+}
+
+/* Grid Background */
+.bg-grid-pattern {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+}
