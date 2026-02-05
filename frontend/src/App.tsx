@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
-import { LandingPage, Dashboard, MarketLend, MarketBorrow, MyIntents, Analytics, FluidGlassLanding } from "@/pages";
+import { LandingPage, Dashboard, MarketLend, MarketBorrow, Portfolio, Analytics, FluidGlassLanding } from "@/pages";
 
 // Wrapper for the main app layout (Navbar + Sidebar)
 function AppLayout() {
@@ -23,7 +23,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/market/lend" element={<MarketLend />} />
         <Route path="/market/borrow" element={<MarketBorrow />} />
-        <Route path="/intents" element={<MyIntents />} />
+        <Route path="/portfolio" element={<Portfolio />} />
         <Route path="/analytics" element={<Analytics />} />
       </Route>
     </Routes>

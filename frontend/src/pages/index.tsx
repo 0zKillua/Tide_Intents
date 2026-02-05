@@ -2,7 +2,7 @@ export { Dashboard } from "./Dashboard";
 export { MarketLend } from "./MarketLend";
 export { MarketBorrow } from "./MarketBorrow";
 export { LandingPage } from "./LandingPage";
-export { MyIntents } from "./MyIntents";
+export { Portfolio } from "./Portfolio";
 export { FluidGlassLanding } from "./FluidGlassLanding";
 
 // Placeholder Pages

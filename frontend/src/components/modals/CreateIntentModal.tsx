@@ -28,6 +28,7 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
   const [rate, setRate] = useState("500"); // BPS
   const [ltv, setLtv] = useState("70"); // % used for converting to BPS
   const [duration, setDuration] = useState("30"); // Days
+  const [allowPartialFill, setAllowPartialFill] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Early return AFTER all hooks
@@ -85,7 +86,7 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
             tx.pure.u64(parseInt(ltv) * 100), // Max LTV BPS
             tx.pure.u64(durationMs),
             tx.pure.u64(Math.floor(amountRaw / 10)), // min_fill
-            tx.pure.bool(true),
+            tx.pure.bool(allowPartialFill),
             tx.pure.id(marketId),
             tx.object("0x6"),
           ],
@@ -285,6 +286,24 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
               onChange={(e) => setDuration(e.target.value)}
             />
           </div>
+
+          {type === "Lend" && (
+            <div className="flex items-center space-x-2 pt-2">
+              <input 
+                type="checkbox" 
+                id="partialFill" 
+                checked={allowPartialFill}
+                onChange={(e) => setAllowPartialFill(e.target.checked)}
+                className="rounded border-gray-600 bg-surface/50 text-primary focus:ring-primary"
+              />
+              <label 
+                htmlFor="partialFill" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-gray-300"
+              >
+                Allow Partial Fills
+              </label>
+            </div>
+          )}
 
         </CardContent>
         <CardFooter className="flex justify-end gap-2">

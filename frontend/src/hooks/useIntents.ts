@@ -30,7 +30,7 @@ export function useIntents() {
   const borrowIds = borrowEvents?.data.map((e: any) => e.parsedJson?.request_id) || [];
 
   // 2. Fetch Live Object States (to check if active/deleted)
-  const { data: lendObjects, isLoading: loadingLendObjs } = useSuiClientQuery(
+  const { data: lendObjects, isLoading: loadingLendObjs, refetch: refetchLend } = useSuiClientQuery(
     "multiGetObjects",
     {
       ids: lendIds,
@@ -38,10 +38,12 @@ export function useIntents() {
     },
     {
       enabled: lendIds.length > 0,
+      // Poll every 5s to keep fresh
+      refetchInterval: 5000, 
     }
   );
 
-  const { data: borrowObjects, isLoading: loadingBorrowObjs } = useSuiClientQuery(
+  const { data: borrowObjects, isLoading: loadingBorrowObjs, refetch: refetchBorrow } = useSuiClientQuery(
     "multiGetObjects",
     {
       ids: borrowIds,
@@ -49,6 +51,7 @@ export function useIntents() {
     },
     {
       enabled: borrowIds.length > 0,
+      refetchInterval: 5000,
     }
   );
 
@@ -56,9 +59,15 @@ export function useIntents() {
   const activeLendOffers = lendObjects?.map(res => res.data).filter(obj => obj && obj.content) || [];
   const activeBorrowRequests = borrowObjects?.map(res => res.data).filter(obj => obj && obj.content) || [];
 
+
+
   return {
     lendOffers: activeLendOffers,
     borrowRequests: activeBorrowRequests,
     isLoading: loadingLendEvents || loadingBorrowEvents || loadingLendObjs || loadingBorrowObjs,
+    refetch: () => {
+        refetchLend();
+        refetchBorrow();
+    }
   };
 }

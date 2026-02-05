@@ -17,6 +17,7 @@ import { FillRequestModal } from "@/components/modals/FillRequestModal";
 import { Filter, Plus } from "lucide-react";
 import type { BorrowRequest } from "@/types";
 
+
 export function MarketLend() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<BorrowRequest | null>(
@@ -29,7 +30,13 @@ export function MarketLend() {
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
 
-  const filteredRequests = borrowRequests.filter((_req) => {
+  const filteredRequests = borrowRequests.filter((req: any) => {
+    if (req.content?.dataType !== "moveObject") return false;
+    const fields = req.content.fields;
+    const collateralVal = parseInt(fields.collateral || "0");
+    // Filter out requests with 0 collateral
+    if (collateralVal <= 0) return false;
+    
     // Search Logic (Mock for now since we need to decode coin types)
     // Assuming req structure matches our types, but we need to verify mapping
     return true;
@@ -93,7 +100,7 @@ export function MarketLend() {
             <TableRow>
               <TableHead>Collateral</TableHead>
               <TableHead>Requesting</TableHead>
-              <TableHead>LTV</TableHead>
+              <TableHead>Min LTV</TableHead>
               <TableHead>APR</TableHead>
               <TableHead>Duration</TableHead>
               <TableHead className="text-right">Action</TableHead>
@@ -127,7 +134,13 @@ export function MarketLend() {
               const fields = req.content.fields;
 
               // Safe parsing
-              const collateralVal = parseInt(fields.collateral || "0") / 1e8; // Assuming BTC (8 decimals)
+              const typeString = req.content?.type || "";
+              // Check if collateral (2nd arg) is USDC or BTC. 
+              // BorrowRequest<Coin, Collateral>
+              const isBtcCollateral = typeString.includes("::mock_btc::MOCK_BTC"); 
+              const collateralDecimals = isBtcCollateral ? 8 : 6; // Default to 6 (USDC/SUI) if not BTC for this hackathon
+              
+              const collateralVal = parseInt(fields.collateral || "0") / Math.pow(10, collateralDecimals);
               const requestAmount =
                 parseInt(fields.request_amount || "0") / 1e6; // Assuming USDC (6 decimals)
               const ltv = parseInt(fields.min_ltv_bps || "0") / 100;
@@ -143,7 +156,7 @@ export function MarketLend() {
                     <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center text-xs text-secondary">
                       C
                     </div>
-                    {collateralVal.toFixed(4)} Collateral
+                    {collateralVal.toFixed(4)} {isBtcCollateral ? "BTC" : "USDC"}
                   </TableCell>
                   <TableCell>{requestAmount.toFixed(2)} USDC</TableCell>
                   <TableCell>

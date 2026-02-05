@@ -14,7 +14,7 @@ const links = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Market: Lend", href: "/market/lend", icon: TrendingUp },
   { name: "Market: Borrow", href: "/market/borrow", icon: TrendingDown },
-  { name: "My Intents", href: "/intents", icon: ListTodo },
+  { name: "Portfolio", href: "/portfolio", icon: ListTodo },
   { name: "Analytics", href: "/analytics", icon: BarChart3 },
 ];
 

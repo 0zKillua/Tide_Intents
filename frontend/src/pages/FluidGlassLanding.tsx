@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRight, BookOpen, Droplets } from "lucide-react";
+import { ArrowRight, Droplets } from "lucide-react";
 
 export function FluidGlassLanding() {
   return (

@@ -60,7 +60,11 @@ export function MarketBorrow() {
                 <TableRow><TableCell colSpan={6} className="text-center py-8 text-gray-400">No active offers found.</TableCell></TableRow>
             )}
 
-            {lendOffers.map((obj: any) => {
+            {lendOffers.filter((obj: any) => {
+              const fields = obj.content?.fields || obj;
+              const assetValue = fields.asset?.fields?.value || fields.asset?.value || fields.asset || '0';
+              return parseInt(assetValue) > 0;
+            }).map((obj: any) => {
               // Data is in content.fields for SuiObjectData
               const fields = obj.content?.fields || obj;
               const assetValue = fields.asset?.fields?.value || fields.asset?.value || fields.asset || '0';
