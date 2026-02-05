@@ -1,0 +1,14 @@
+{
+  "name": "tide-scripts",
+  "version": "1.0.0",
+  "description": "Off-chain scripts for Tide Protocol",
+  "main": "matcher_bot.ts",
+  "dependencies": {
+    "@mysten/sui.js": "^0.51.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,208 @@
+[note] Dependencies on Bridge, MoveStdlib, Sui, and SuiSystem are automatically added, but this feature is disabled for your package because you have explicitly included dependencies on Sui. Consider removing these dependencies from Move.toml.
+INCLUDING DEPENDENCY Sui
+INCLUDING DEPENDENCY MoveStdlib
+BUILDING tide_protocol
+[0m[1m[38;5;11mwarning[W02021][0m[1m: duplicate alias[0m
+  [0m[34m┌─[0m ./tests/test_env.move:6:26
+  [0m[34m│[0m
+[0m[34m6[0m [0m[34m│[0m     use sui::tx_context::[0m[33mTxContext[0m;
+  [0m[34m│[0m                          [0m[33m^^^^^^^^^[0m [0m[33mUnnecessary alias 'TxContext' for module member 'sui::tx_context::TxContext'. This alias is provided by default[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(duplicate_alias)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+    [0m[34m┌─[0m ./sources/intents.move:105:36
+    [0m[34m│[0m
+[0m[34m105[0m [0m[34m│[0m             coin_type: into_string([0m[33mget[0m<CoinType>())
+    [0m[34m│[0m                                    [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+    [0m[34m┌─[0m ./sources/intents.move:135:13
+    [0m[34m│[0m
+[0m[34m112[0m [0m[34m│[0m     public fun cancel_lend_offer<CoinType>(
+    [0m[34m│[0m                [0m[34m-----------------[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+    [0m[34m·[0m
+[0m[34m135[0m [0m[34m│[0m             [0m[33mtransfer::public_transfer(coin_to_return, tx_context::sender(ctx))[0m;
+    [0m[34m│[0m             [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[34m│[0m             [0m[33m│[0m                                         [0m[34m│[0m
+    [0m[34m│[0m             [0m[33m│[0m                                         [0m[34mTransaction sender address coming from here[0m
+    [0m[34m│[0m             [0m[33mTransfer of an object to transaction sender address[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+    [0m[34m┌─[0m ./sources/intents.move:184:36
+    [0m[34m│[0m
+[0m[34m184[0m [0m[34m│[0m             coin_type: into_string([0m[33mget[0m<CoinType>()),
+    [0m[34m│[0m                                    [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+    [0m[34m┌─[0m ./sources/intents.move:185:42
+    [0m[34m│[0m
+[0m[34m185[0m [0m[34m│[0m             collateral_type: into_string([0m[33mget[0m<CollateralType>())
+    [0m[34m│[0m                                          [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+    [0m[34m┌─[0m ./sources/intents.move:213:13
+    [0m[34m│[0m
+[0m[34m191[0m [0m[34m│[0m     public fun cancel_borrow_request<CoinType, CollateralType>(
+    [0m[34m│[0m                [0m[34m---------------------[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+    [0m[34m·[0m
+[0m[34m213[0m [0m[34m│[0m             [0m[33mtransfer::public_transfer(coin_to_return, tx_context::sender(ctx))[0m;
+    [0m[34m│[0m             [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[34m│[0m             [0m[33m│[0m                                         [0m[34m│[0m
+    [0m[34m│[0m             [0m[33m│[0m                                         [0m[34mTransaction sender address coming from here[0m
+    [0m[34m│[0m             [0m[33mTransfer of an object to transaction sender address[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09002][0m[1m: unused variable[0m
+   [0m[34m┌─[0m ./sources/liquidation.move:41:13
+   [0m[34m│[0m
+[0m[34m41[0m [0m[34m│[0m         let [0m[33mcollateral_val[0m = math::calculate_ltv(debt, (loan::collateral_balance(loan) as u64) * price); // This math might be tricky with decimals.
+   [0m[34m│[0m             [0m[33m^^^^^^^^^^^^^^[0m [0m[33mUnused local variable 'collateral_val'. Consider removing or prefixing with an underscore: '_collateral_val'[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_variable)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+   [0m[34m┌─[0m ./sources/liquidation.move:92:13
+   [0m[34m│[0m
+[0m[34m19[0m [0m[34m│[0m     public fun liquidate<CoinType, CollateralType>(
+   [0m[34m│[0m                [0m[34m---------[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+   [0m[34m·[0m
+[0m[34m92[0m [0m[34m│[0m             [0m[33mtransfer::public_transfer(payment, tx_context::sender(ctx))[0m;
+   [0m[34m│[0m             [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+   [0m[34m│[0m             [0m[33m│[0m                                  [0m[34m│[0m
+   [0m[34m│[0m             [0m[33m│[0m                                  [0m[34mTransaction sender address coming from here[0m
+   [0m[34m│[0m             [0m[33mTransfer of an object to transaction sender address[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+   [0m[34m┌─[0m ./sources/liquidation.move:99:9
+   [0m[34m│[0m
+[0m[34m19[0m [0m[34m│[0m     public fun liquidate<CoinType, CollateralType>(
+   [0m[34m│[0m                [0m[34m---------[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+   [0m[34m·[0m
+[0m[34m99[0m [0m[34m│[0m         [0m[33mtransfer::public_transfer(seized_coin, tx_context::sender(ctx))[0m;
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+   [0m[34m│[0m         [0m[33m│[0m                                      [0m[34m│[0m
+   [0m[34m│[0m         [0m[33m│[0m                                      [0m[34mTransaction sender address coming from here[0m
+   [0m[34m│[0m         [0m[33mTransfer of an object to transaction sender address[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m ./sources/loan.move:8:15
+  [0m[34m│[0m
+[0m[34m8[0m [0m[34m│[0m     use tide::[0m[33mconstants[0m;
+  [0m[34m│[0m               [0m[33m^^^^^^^^^[0m [0m[33mUnused 'use' of alias 'constants'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m ./sources/loan.move:69:9
+   [0m[34m│[0m
+[0m[34m69[0m [0m[34m│[0m         [0m[33mloan_id[0m: ID,
+   [0m[34m│[0m         [0m[33m^^^^^^^[0m [0m[33mThe 'loan_id' field of the 'LoanLiquidated' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m ./sources/loan.move:70:9
+   [0m[34m│[0m
+[0m[34m70[0m [0m[34m│[0m         [0m[33mliquidator[0m: address,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^[0m [0m[33mThe 'liquidator' field of the 'LoanLiquidated' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m ./sources/loan.move:71:9
+   [0m[34m│[0m
+[0m[34m71[0m [0m[34m│[0m         [0m[33mdebt_paid[0m: u64,
+   [0m[34m│[0m         [0m[33m^^^^^^^^^[0m [0m[33mThe 'debt_paid' field of the 'LoanLiquidated' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09009][0m[1m: unused struct field[0m
+   [0m[34m┌─[0m ./sources/loan.move:72:9
+   [0m[34m│[0m
+[0m[34m72[0m [0m[34m│[0m         [0m[33mcollateral_seized[0m: u64
+   [0m[34m│[0m         [0m[33m^^^^^^^^^^^^^^^^^[0m [0m[33mThe 'collateral_seized' field of the 'LoanLiquidated' type is unused[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(unused_field)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+    [0m[34m┌─[0m ./sources/loan.move:104:13
+    [0m[34m│[0m
+[0m[34m 78[0m [0m[34m│[0m     public fun repay<CoinType, CollateralType>(
+    [0m[34m│[0m                [0m[34m-----[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+    [0m[34m·[0m
+[0m[34m104[0m [0m[34m│[0m             [0m[33mtransfer::public_transfer(payment, tx_context::sender(ctx))[0m;
+    [0m[34m│[0m             [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[34m│[0m             [0m[33m│[0m                                  [0m[34m│[0m
+    [0m[34m│[0m             [0m[33m│[0m                                  [0m[34mTransaction sender address coming from here[0m
+    [0m[34m│[0m             [0m[33mTransfer of an object to transaction sender address[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[Lint W99001][0m[1m: non-composable transfer to sender[0m
+    [0m[34m┌─[0m ./sources/loan.move:143:9
+    [0m[34m│[0m
+[0m[34m124[0m [0m[34m│[0m     public fun claim<CoinType, CollateralType>(
+    [0m[34m│[0m                [0m[34m-----[0m [0m[34mReturning an object from a function, allows a caller to use the object and enables composability via programmable transactions.[0m
+    [0m[34m·[0m
+[0m[34m143[0m [0m[34m│[0m         [0m[33mtransfer::public_transfer(funds, tx_context::sender(ctx))[0m;
+    [0m[34m│[0m         [0m[33m^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^[0m
+    [0m[34m│[0m         [0m[33m│[0m                                [0m[34m│[0m
+    [0m[34m│[0m         [0m[33m│[0m                                [0m[34mTransaction sender address coming from here[0m
+    [0m[34m│[0m         [0m[33mTransfer of an object to transaction sender address[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(lint(self_transfer))]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+    [0m[34m┌─[0m ./sources/loan.move:194:41
+    [0m[34m│[0m
+[0m[34m194[0m [0m[34m│[0m             coin_type_name: into_string([0m[33mget[0m<CoinType>())
+    [0m[34m│[0m                                         [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+    [0m[34m│[0m
+    [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+   [0m[34m┌─[0m ./sources/market.move:56:42
+   [0m[34m│[0m
+[0m[34m56[0m [0m[34m│[0m         let coin_type_name = into_string([0m[33mget[0m<CoinType>());
+   [0m[34m│[0m                                          [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W04037][0m[1m: deprecated usage[0m
+   [0m[34m┌─[0m ./sources/market.move:57:48
+   [0m[34m│[0m
+[0m[34m57[0m [0m[34m│[0m         let collateral_type_name = into_string([0m[33mget[0m<CollateralType>());
+   [0m[34m│[0m                                                [0m[33m^^^[0m [0m[33mThe function 'std::type_name::get' is deprecated: Renamed to `with_defining_ids` for clarity.[0m
+   [0m[34m│[0m
+   [0m[34m=[0m This warning can be suppressed with '#[allow(deprecated_usage)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+[0m[1m[38;5;11mwarning[W09001][0m[1m: unused alias[0m
+  [0m[34m┌─[0m ./tests/flow_tests.move:5:28
+  [0m[34m│[0m
+[0m[34m5[0m [0m[34m│[0m     use sui::clock::{Self, [0m[33mClock[0m};
+  [0m[34m│[0m                            [0m[33m^^^^^[0m [0m[33mUnused 'use' of alias 'Clock'. Consider removing it[0m
+  [0m[34m│[0m
+  [0m[34m=[0m This warning can be suppressed with '#[allow(unused_use)]' applied to the 'module' or module member ('const', 'fun', or 'struct')
+
+Running Move unit tests
+[ PASS    ] tide::math_tests::test_interest_calc
+[ PASS    ] tide::math_tests::test_interest_calc_half_year
+[ PASS    ] tide::math_tests::test_ltv_calc
+[ PASS    ] tide::flow_tests::test_successful_loan_lifecycle
+Test result: OK. Total tests: 4; passed: 4; failed: 0
+Please report feedback on the linter warnings at https://forums.sui.io
+
