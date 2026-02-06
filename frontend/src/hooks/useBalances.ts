@@ -32,12 +32,6 @@ export function useBalances() {
           balance: (balances.USDC?.balance || 0) + balance / (10 ** TIDE_CONFIG.COINS.USDC.DECIMALS),
           decimals: TIDE_CONFIG.COINS.USDC.DECIMALS,
         };
-      } else if (type === TIDE_CONFIG.COINS.BTC.TYPE) {
-        balances.BTC = {
-          symbol: "BTC",
-          balance: (balances.BTC?.balance || 0) + balance / (10 ** TIDE_CONFIG.COINS.BTC.DECIMALS),
-          decimals: TIDE_CONFIG.COINS.BTC.DECIMALS,
-        };
       } else if (type === "0x2::sui::SUI") {
         balances.SUI = {
           symbol: "SUI",
