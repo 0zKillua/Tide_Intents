@@ -37,6 +37,16 @@ module tide::loan {
         coin_type_name: std::ascii::String, // For metadata/UI
     }
 
+    /// Hot Potato for collateral-based repayment.
+    /// No `store` or `drop` ability - MUST be consumed in same transaction.
+    /// This enables "flash repay" where collateral is withdrawn, swapped externally,
+    /// and the proceeds used to repay the loan atomically.
+    public struct FlashReceipt<phantom CoinType, phantom CollateralType> {
+        loan_id: ID,
+        collateral_withdrawn: u64,
+        min_repay_amount: u64, // Minimum debt tokens required to close this receipt
+    }
+
     // === Constants for State ===
     const STATE_ACTIVE: u8 = 0;
     const STATE_REPAID: u8 = 1;
@@ -248,5 +258,109 @@ module tide::loan {
             let coin = coin::from_balance(balance::split(&mut loan.collateral, val), ctx);
             transfer::public_transfer(coin, loan.borrower);
         }
+    }
+
+    // === Flash Repayment (Hot Potato Pattern) ===
+
+    /// Step 1: Borrower initiates collateral-based repayment.
+    /// Withdraws collateral and returns a FlashReceipt that MUST be consumed.
+    /// The borrower can take this collateral, swap it on DeepBook (or any DEX),
+    /// and use the proceeds to call `finish_collateral_repayment`.
+    public fun start_collateral_repayment<CoinType, CollateralType>(
+        loan: &mut Loan<CoinType, CollateralType>,
+        collateral_amount: u64,
+        ctx: &mut TxContext
+    ): (Coin<CollateralType>, FlashReceipt<CoinType, CollateralType>) {
+        assert!(loan.state == STATE_ACTIVE, errors::loan_not_active());
+        
+        // Verify caller is the borrower
+        assert!(tx_context::sender(ctx) == loan.borrower, errors::not_borrower());
+        
+        // Verify sufficient collateral
+        assert!(balance::value(&loan.collateral) >= collateral_amount, errors::invalid_amount());
+        
+        // Calculate total debt
+        let interest = math::calculate_interest(
+            loan.principal, 
+            loan.interest_rate_bps, 
+            loan.duration_ms
+        );
+        let total_debt = loan.principal + interest;
+        
+        // Withdraw collateral
+        let withdrawn = coin::from_balance(
+            balance::split(&mut loan.collateral, collateral_amount),
+            ctx
+        );
+        
+        // Create hot potato receipt
+        let receipt = FlashReceipt<CoinType, CollateralType> {
+            loan_id: object::uid_to_inner(&loan.id),
+            collateral_withdrawn: collateral_amount,
+            min_repay_amount: total_debt, // Must repay full debt
+        };
+        
+        (withdrawn, receipt)
+    }
+
+    /// Step 2: Complete the collateral-based repayment.
+    /// The borrower provides the debt tokens (obtained by swapping collateral).
+    /// This destroys the FlashReceipt (hot potato consumed).
+    public fun finish_collateral_repayment<CoinType, CollateralType>(
+        loan: &mut Loan<CoinType, CollateralType>,
+        receipt: FlashReceipt<CoinType, CollateralType>,
+        mut payment: Coin<CoinType>,
+        ctx: &mut TxContext
+    ) {
+        // Unpack receipt (this destroys the hot potato)
+        let FlashReceipt { 
+            loan_id, 
+            collateral_withdrawn: _, 
+            min_repay_amount 
+        } = receipt;
+        
+        // Verify receipt matches this loan
+        assert!(loan_id == object::uid_to_inner(&loan.id), errors::invalid_loan_note());
+        
+        // Verify sufficient payment
+        let payment_value = coin::value(&payment);
+        assert!(payment_value >= min_repay_amount, errors::insufficient_payment());
+        
+        // Take exact repayment amount
+        let paid_coin = coin::split(&mut payment, min_repay_amount, ctx);
+        balance::join(&mut loan.repaid_funds, coin::into_balance(paid_coin));
+        
+        // Return any leftover collateral to borrower
+        let remaining_collateral = balance::value(&loan.collateral);
+        if (remaining_collateral > 0) {
+            let collateral_coin = coin::from_balance(
+                balance::split(&mut loan.collateral, remaining_collateral),
+                ctx
+            );
+            transfer::public_transfer(collateral_coin, loan.borrower);
+        };
+        
+        // Return excess payment if any
+        if (coin::value(&payment) > 0) {
+            transfer::public_transfer(payment, loan.borrower);
+        } else {
+            coin::destroy_zero(payment);
+        };
+        
+        // Mark loan as repaid
+        loan.state = STATE_REPAID;
+        
+        // Calculate interest for event
+        let interest = math::calculate_interest(
+            loan.principal, 
+            loan.interest_rate_bps, 
+            loan.duration_ms
+        );
+        
+        event::emit(LoanRepaid {
+            loan_id,
+            amount_paid: min_repay_amount,
+            interest_paid: interest
+        });
     }
 }

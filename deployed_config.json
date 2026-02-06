@@ -1,0 +1,14 @@
+{
+  "NETWORK": "testnet",
+  "PACKAGE_ID": "0x6aacd5634c33eb11d6eceef58f7cafb6444cabb4ad8b7fbff15aa3d359c2bf4d",
+  "ADMIN_CAP_ID": "0xeb883f492fd5728a86faf2c26ec21ad6d8fb27bdfdf71cdf72c9febe311ad655",
+  "MARKET_ID": "0xcb8ddc55e8379312689aa0cb2a2224fb888708edd1890e04b7a891a13cb1f583",
+  "USDC_CAP_ID": "0x4ba263d694ec4aa28f35863af9d9081b10846fe246244b10c02cac87b85d20ca",
+  "BTC_CAP_ID": "0x4cec2a0bb09a4f90dcdeb0863c8c74192073f1fcae10a88416fa23b6d4b26ae7",
+  "SUI_CAP_ID": "0x39efb35e3bae6e50a5de4df8085c2630e7bb075d8584a470f3c8ede5ecd0668b",
+  "MOCK_USDC_TYPE": "0x6aacd5634c33eb11d6eceef58f7cafb6444cabb4ad8b7fbff15aa3d359c2bf4d::mock_usdc::MOCK_USDC",
+  "MOCK_BTC_TYPE": "0x6aacd5634c33eb11d6eceef58f7cafb6444cabb4ad8b7fbff15aa3d359c2bf4d::mock_btc::MOCK_BTC",
+  "MOCK_SUI_TYPE": "0x6aacd5634c33eb11d6eceef58f7cafb6444cabb4ad8b7fbff15aa3d359c2bf4d::mock_sui::MOCK_SUI",
+  "DEPLOYED_AT": "2026-01-31T12:15:58.492Z",
+  "DEPLOY_TX": "82y2PD7RVdprJRak62XDnKG2uYuer5csgzti1cVYSP45"
+}
