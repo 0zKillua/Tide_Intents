@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,12 @@ import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 import { Transaction } from "@mysten/sui/transactions";
 import { TIDE_CONFIG } from "@/tide_config";
 import { useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export function Portfolio() {
   const currentAccount = useCurrentAccount();
+  const [activeTab, setActiveTab] = useState("loans");
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const { lendOffers, borrowRequests, refetch } = useIntents();
   const { loans, isLoading: isLoansLoading } = useLoans();
@@ -195,13 +198,33 @@ export function Portfolio() {
         <p className="text-gray-400">Manage your active positions and open orders.</p>
       </div>
 
-      <Tabs defaultValue="loans" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 bg-surface/50 p-1">
-            <TabsTrigger value="intents">Active Intents</TabsTrigger>
-            <TabsTrigger value="loans">Active Loans</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-            <TabsTrigger value="liquidations">Liquidations</TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="loans" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="relative flex p-1 bg-surface/30 backdrop-blur-md rounded-xl border border-white/5 mb-8">
+            {["intents", "loans", "history", "liquidations"].map((tab) => (
+                <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className={cn(
+                        "relative z-10 flex-1 py-2.5 text-sm font-medium transition-colors duration-200",
+                        activeTab === tab ? "text-white" : "text-gray-400 hover:text-gray-200"
+                    )}
+                >
+                    {activeTab === tab && (
+                        <motion.div
+                            layoutId="activeTab"
+                            className="absolute inset-0 bg-secondary rounded-lg shadow-lg"
+                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                    )}
+                    <span className="relative z-20">
+                        {tab === "intents" && "Active Intents"}
+                        {tab === "loans" && "Active Loans"}
+                        {tab === "history" && "History"}
+                        {tab === "liquidations" && "Liquidations"}
+                    </span>
+                </button>
+            ))}
+        </div>
 
         {/* Tab 1: Active Intents */}
         <TabsContent value="intents" className="space-y-6 mt-6">

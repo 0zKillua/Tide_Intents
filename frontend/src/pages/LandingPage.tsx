@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { ArrowRight, Waves, Shield, Zap, ShieldOff } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { LiveTicker } from "@/components/ui/LiveTicker";
 import { FloatingTags } from "@/components/ui/FloatingTags";
 import { CosmicBackground } from "@/components/ui/CosmicBackground";
+import { InteractiveProtocolFlow } from "@/components/landing/InteractiveProtocolFlow";
 
 export function LandingPage() {
   return (
@@ -89,47 +90,8 @@ export function LandingPage() {
         <LiveTicker />
       </div>
 
-      {/* Features Grid */}
-      <section className="py-24 px-6 bg-surface/30 border-t border-surface-hover">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div className="space-y-4 p-6 rounded-2xl bg-surface/50 border border-white/5 hover:border-secondary/50 transition-colors group">
-            <div className="w-12 h-12 rounded-lg bg-secondary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Zap className="h-6 w-6 text-secondary" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Instant Matching</h3>
-            <p className="text-gray-400 text-sm">
-              Off-chain solvers match intents in milliseconds, settling atomically on Sui.
-            </p>
-          </div>
-          <div className="space-y-4 p-6 rounded-2xl bg-surface/50 border border-white/5 hover:border-primary/50 transition-colors group">
-             <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Waves className="h-6 w-6 text-primary" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Fluid Liquidity</h3>
-            <p className="text-gray-400 text-sm">
-              No spread. Dynamic rates. Pure market efficiency.
-            </p>
-          </div>
-          <div className="space-y-4 p-6 rounded-2xl bg-surface/50 border border-white/5 hover:border-success/50 transition-colors group">
-             <div className="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Shield className="h-6 w-6 text-success" />
-            </div>
-            <h3 className="text-xl font-bold text-white">Isolated Risk</h3>
-            <p className="text-gray-400 text-sm">
-              Bilateral loans. <strong>No bad debt socialization.</strong>
-            </p>
-          </div>
-          <div className="space-y-4 p-6 rounded-2xl bg-gradient-to-br from-destructive/10 to-surface/50 border border-destructive/30 hover:border-destructive/50 transition-colors group">
-             <div className="w-12 h-12 rounded-lg bg-destructive/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ShieldOff className="h-6 w-6 text-destructive" />
-            </div>
-            <h3 className="text-xl font-bold text-white">No Shared Pools</h3>
-            <p className="text-gray-400 text-sm">
-              Pools enable exploits. Tide has none. <strong>Inherently secure.</strong>
-            </p>
-          </div>
-        </div>
-      </section>
+      {/* Protocol Explainer / Features */}
+      <InteractiveProtocolFlow />
       
       <footer className="py-8 text-center text-gray-500 text-sm">
         © 2026 Tide Protocol. Built on Sui.
