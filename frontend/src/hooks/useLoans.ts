@@ -57,6 +57,7 @@ export function useLoans() {
       if (obj.data?.content?.dataType === "moveObject") {
           return {
               objectId: obj.data.objectId,
+              type: obj.data.content.type,
               ...obj.data.content.fields
           };
       }

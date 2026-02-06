@@ -5,6 +5,17 @@ export const TIDE_CONFIG = {
     ADMIN_CAP_ID: "0x261fa88d59bf5b1c18a090bfe8b4ed691c730e080c937050a5b04e97a8b46a83",
     REGISTRY_ID: "0x940531c1a8a96631f1cd72c7773d0bef3ed6d6d25ac351ee026633b15eb44903",
     
+    // DeepBook V3 Testnet
+    // IMPORTANT: This must match the package that created the pool!
+    DEEPBOOK: {
+        PACKAGE_ID: "0xfb28c4cbc6865bd1c897d26aecbe1f8792d1509a20ffec692c800660cbec6982",
+        REGISTRY: "0x7c256edbda983a2cd6f946655f4bf3f00a41043993781f8674a7046e8c0e11d1",
+        // SUI/MOCK_USDC Pool - deployed and seeded with DEEP price point
+        SUI_USDC_POOL: "0x25fa26d1d3125bc32c9665dae5505b96737c939d4ab79014b379ffee954684f4",
+        // Testnet DEEP token for fee payments
+        DEEP_TOKEN_TYPE: "0x36dbef866a1d62bf7328989a10fb2f07d769f4ee587c0de4a0a256e57e0a58a8::deep::DEEP",
+    },
+    
     // Tokens
     COINS: {
         USDC: {

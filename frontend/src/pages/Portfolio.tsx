@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCurrentAccount } from "@mysten/dapp-kit";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -13,6 +13,8 @@ import { useHistory } from "@/hooks/useHistory";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { RepayModal } from "@/components/modals/RepayModal";
 import { ClaimModal } from "@/components/modals/ClaimModal";
+import { TransactionPendingOverlay } from "@/components/ui/TransactionPendingOverlay";
+import { ConfirmationModal } from "@/components/ui/ConfirmationModal";
 
 import { Transaction } from "@mysten/sui/transactions";
 import { TIDE_CONFIG } from "@/tide_config";
@@ -27,13 +29,51 @@ export function Portfolio() {
   const { history } = useHistory();
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [selectedClaimNote, setSelectedClaimNote] = useState<any>(null);
-  const [isCancelling, setIsCancelling] = useState(false);
+  const [txStatus, setTxStatus] = useState<"pending" | "success" | "error" | "idle">("idle");
+  const [txMessage, setTxMessage] = useState("");
+  
+  // Confirmation State
+  const [confirmConfig, setConfirmConfig] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  // Fix: import useEffect if missing (it is missing in previous file content block shown)
+
+  // Auto-close success
+  useEffect(() => {
+    if (txStatus === "success") {
+        const t = setTimeout(() => {
+            setTxStatus("idle");
+            refetch(); // Refetch on success
+        }, 2000);
+        return () => clearTimeout(t);
+    }
+  }, [txStatus, refetch]);
 
 
   const handleCancelLend = async (offerId: string, coinType: string) => {
-    if (isCancelling) return;
-    if (!confirm("Are you sure you want to cancel this offer?")) return;
-    setIsCancelling(true);
+    setConfirmConfig({
+        isOpen: true,
+        title: "Cancel Lend Offer",
+        message: "Are you sure you want to cancel this lend offer? This will return your funds.",
+        onConfirm: () => executeCancelLend(offerId, coinType)
+    });
+  };
+
+  const executeCancelLend = async (offerId: string, coinType: string) => {
+    if (txStatus !== "idle") return;
+    
+    setTxStatus("pending");
+    setTxMessage("Cancelling offer...");
+
     try {
         const tx = new Transaction();
         tx.moveCall({
@@ -43,22 +83,35 @@ export function Portfolio() {
         });
         signAndExecuteTransaction({ transaction: tx }, {
             onSuccess: () => {
-                alert("Offer cancelled successfully");
-                refetch();
+                setTxStatus("success");
+                setTxMessage("Offer cancelled successfully");
             },
-            onError: (e) => alert("Failed to cancel: " + e.message)
+            onError: (e) => {
+                setTxStatus("error");
+                setTxMessage("Failed to cancel: " + e.message);
+            }
         });
     } catch(e: any) {
-        alert("Error: " + e.message);
-    } finally {
-        setIsCancelling(false);
-    }
+        setTxStatus("error");
+        setTxMessage("Error: " + e.message);
+    } 
   };
 
   const handleCancelBorrow = async (requestId: string, principalType: string, collateralType: string) => {
-    if (isCancelling) return;
-    if (!confirm("Are you sure you want to cancel this request?")) return;
-    setIsCancelling(true);
+    setConfirmConfig({
+        isOpen: true,
+        title: "Cancel Borrow Request",
+        message: "Are you sure you want to cancel this borrow request? This will return your collateral.",
+        onConfirm: () => executeCancelBorrow(requestId, principalType, collateralType)
+    });
+  };
+
+  const executeCancelBorrow = async (requestId: string, principalType: string, collateralType: string) => {
+    if (txStatus !== "idle") return;
+    
+    setTxStatus("pending");
+    setTxMessage("Cancelling request...");
+
     try {
         const tx = new Transaction();
         tx.moveCall({
@@ -68,16 +121,18 @@ export function Portfolio() {
         });
         signAndExecuteTransaction({ transaction: tx }, {
             onSuccess: () => {
-                alert("Request cancelled successfully");
-                refetch();
+                setTxStatus("success");
+                setTxMessage("Request cancelled successfully");
             },
-            onError: (e) => alert("Failed to cancel: " + e.message)
+            onError: (e) => {
+                setTxStatus("error");
+                setTxMessage("Failed to cancel: " + e.message);
+            }
         });
     } catch(e: any) {
-        alert("Error: " + e.message);
-    } finally {
-        setIsCancelling(false);
-    }
+        setTxStatus("error");
+        setTxMessage("Error: " + e.message);
+    } 
   };
   
   if (!currentAccount) {
@@ -119,6 +174,22 @@ export function Portfolio() {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
+      <TransactionPendingOverlay 
+          isVisible={txStatus !== "idle"} 
+          status={txStatus === "idle" ? "pending" : txStatus}
+          message={txMessage} 
+          onClose={() => setTxStatus("idle")}
+      />
+      
+      <ConfirmationModal 
+        isOpen={confirmConfig.isOpen}
+        onClose={() => setConfirmConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmConfig.onConfirm}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        variant="destructive"
+        confirmLabel="Yes, Cancel"
+      />
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Portfolio</h1>
         <p className="text-gray-400">Manage your active positions and open orders.</p>
@@ -166,10 +237,10 @@ export function Portfolio() {
                                             <Button 
                                                 variant="destructive" 
                                                 size="sm" 
-                                                disabled={isCancelling}
+                                                disabled={txStatus !== "idle"}
                                                 onClick={() => handleCancelLend(offer.objectId, TIDE_CONFIG.COINS.USDC.TYPE)}
                                             >
-                                                {isCancelling ? <Loader2 className="w-4 h-4 animate-spin"/> : "Cancel"}
+                                                Cancel
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -215,13 +286,13 @@ export function Portfolio() {
                                             <Button 
                                                 variant="destructive" 
                                                 size="sm" 
-                                                disabled={isCancelling}
+                                                disabled={txStatus !== "idle"}
                                                 onClick={() => {
                                                     const colType = isSuiCollateral ? TIDE_CONFIG.COINS.SUI.TYPE : TIDE_CONFIG.COINS.USDC.TYPE;
                                                     handleCancelBorrow(req.objectId, TIDE_CONFIG.COINS.USDC.TYPE, colType);
                                                 }}
                                             >
-                                                {isCancelling ? <Loader2 className="w-4 h-4 animate-spin"/> : "Cancel"}
+                                                Cancel
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -256,8 +327,9 @@ export function Portfolio() {
                             {loans.map((loan: any) => {
                                 if (loan.state !== 0) return null; // Only Active
                                 const principal = parseInt(loan.principal) / 1e6;
-                                const typeString = loan.content?.type || ""; // Loan<Coin, Collateral>
-                                const isSuiCollateral = typeString.includes("0x2::sui::SUI");
+                                const typeString = loan.type || ""; // Loan<Coin, Collateral>
+                                console.log("[Portfolio] Loan Type:", typeString, "Content:", loan.content);
+                                const isSuiCollateral = typeString.includes("::sui::SUI");
                                 const colDecimals = isSuiCollateral ? 9 : 6;
                                 const collateral = parseInt(loan.collateral) / Math.pow(10, colDecimals);
                                 const rate = parseInt(loan.interest_rate_bps) / 100;
