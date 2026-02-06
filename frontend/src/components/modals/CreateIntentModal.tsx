@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { TransactionPendingOverlay } from "@/components/ui/TransactionPendingOverlay";
 import { X } from "lucide-react";
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
@@ -37,7 +38,19 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
   const [ltv, setLtv] = useState("70"); // % used for converting to BPS
   const [duration, setDuration] = useState("30"); // Days
   const [allowPartialFill, setAllowPartialFill] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [txStatus, setTxStatus] = useState<"pending" | "success" | "error" | "idle">("idle");
+  const [txMessage, setTxMessage] = useState("");
+  // const [isSubmitting, setIsSubmitting] = useState(false); 
+
+  useEffect(() => {
+    if (txStatus === "success") {
+        const t = setTimeout(() => {
+            setTxStatus("idle");
+            onClose();
+        }, 2000);
+        return () => clearTimeout(t);
+    }
+  }, [txStatus, onClose]);
 
   // Early return AFTER all hooks
   if (!isOpen) return null;
@@ -48,7 +61,8 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
       return;
     }
     
-    setIsSubmitting(true);
+    setTxStatus("pending");
+    setTxMessage(`Creating ${type} Intent...`);
     
     try {
       const tx = new Transaction();
@@ -141,25 +155,33 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
         {
           onSuccess: (result) => {
             console.log("Transaction Success:", result);
-            alert(`${type} Intent created successfully!`);
-            onClose();
+            setTxStatus("success");
+            setTxMessage(`${type} Intent created successfully!`);
           },
           onError: (error) => {
             console.error("Transaction Error:", error);
-            alert("Transaction failed: " + error.message);
+            setTxStatus("error");
+            setTxMessage("Transaction failed: " + error.message);
           },
         }
       );
         
     } catch (e: any) {
       console.error(e);
-      alert("Error: " + e.message);
-    } finally {
-      setIsSubmitting(false);
-    }
+      setTxStatus("error");
+      setTxMessage("Error: " + e.message);
+    } 
+    // removed finally block to prevent early reset
   };
 
   return (
+    <>
+    <TransactionPendingOverlay 
+        isVisible={txStatus !== "idle"} 
+        status={txStatus === "idle" ? "pending" : txStatus}
+        message={txMessage} 
+        onClose={() => setTxStatus("idle")}
+    />
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <Card className="w-[420px] border-primary/50 relative">
         <Button 
@@ -311,12 +333,13 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
           <Button 
             className="bg-primary text-black hover:bg-primary/90 w-full" 
             onClick={handlePost} 
-            disabled={isSubmitting || (type === 'Lend' ? !principalAmount : (!principalAmount || !collateralAmount))}
+            disabled={txStatus !== "idle" || (type === 'Lend' ? !principalAmount : (!principalAmount || !collateralAmount))}
           >
-            {isSubmitting ? "Posting..." : `Create ${type} Intent`}
+            {txStatus === "pending" ? "Processing..." : `Create ${type} Intent`}
           </Button>
         </CardFooter>
       </Card>
     </div>
+    </>
   );
 }

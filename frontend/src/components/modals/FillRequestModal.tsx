@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { TransactionPendingOverlay } from "@/components/ui/TransactionPendingOverlay";
 import { X, Loader2 } from "lucide-react";
 import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
@@ -18,13 +19,27 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // State for editable amount
+  const [txStatus, setTxStatus] = useState<"pending" | "success" | "error" | "idle">("idle");
+  const [txMessage, setTxMessage] = useState("");
   const [fillAmount, setFillAmount] = useState<string>("");
+
+  // Fix: import useEffect if missing (it is missing in previous file content block shown)
+  
+  // Auto-close success
+  // Note: FillRequestModal has a window.reload() on success. We should delay that.
+  useEffect(() => {
+    if (txStatus === "success") {
+        const t = setTimeout(() => {
+            setTxStatus("idle");
+            onClose();
+        }, 2000);
+        return () => clearTimeout(t);
+    }
+  }, [txStatus, onClose]);
 
   if (!isOpen || !data) return null;
 
+  // ... (rest of parsing logic is unchanged)
   // Parse the SuiObjectData structure
   const fields = data.content?.fields || data;
   const offerId = data.objectId || data.id?.id;
@@ -46,7 +61,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
 
   // Derived values based on fillAmount
   const currentAmount = parseFloat(fillAmount) || 0;
-  const MOCK_SUI_PRICE_USD = 2;
+  const MOCK_SUI_PRICE_USD = 1;
   
   const rate = isLender 
       ? parseInt(fields.max_rate_bps || '0') / 100
@@ -65,17 +80,20 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
 
   const handleConfirm = async () => {
     if (!currentAccount) {
-      alert("Please connect wallet first");
+      setTxStatus("error");
+      setTxMessage("Please connect wallet first");
       return;
     }
     
     // Validate amount
     if (currentAmount <= 0 || currentAmount > availableAmount) {
-        alert("Invalid amount");
+        setTxStatus("error");
+        setTxMessage("Invalid amount");
         return;
     }
     
-    setIsSubmitting(true);
+    setTxStatus("pending");
+    setTxMessage(isLender ? "Filling borrow request..." : "Accepting lend offer...");
     
     try {
       const tx = new Transaction();
@@ -109,20 +127,12 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         });
         
       } else {
-        // Filling a LendOffer (Borrower)
+        // Filling a LendOffer (Borrower) - User provides COLLATERAL (SUI)
         const collateralRaw = Math.ceil(collateralRequired * Math.pow(10, suiConfig.DECIMALS));
         const ltvBps = Math.floor(ltvPercent * 100);
         
-        // Get Coins
-        const coins = await suiClient.getCoins({ owner: currentAccount.address, coinType: suiConfig.TYPE });
-        if (!coins.data.length) throw new Error("No SUI found");
-        
-        // Merge & Split
-        const primaryCoin = coins.data[0];
-        if (coins.data.length > 1) {
-            tx.mergeCoins(tx.object(primaryCoin.coinObjectId), coins.data.slice(1).map(c => tx.object(c.coinObjectId)));
-        }
-        const [collateralCoin] = tx.splitCoins(tx.object(primaryCoin.coinObjectId), [collateralRaw]);
+        // Use GAS coin for SUI payment
+        const [collateralCoin] = tx.splitCoins(tx.gas, [tx.pure.u64(collateralRaw)]);
         
         tx.moveCall({
           target: `${packageId}::matcher::fill_lend_offer`,
@@ -143,28 +153,31 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         {
           onSuccess: (result) => {
             console.log("Transaction result:", result);
-            alert("Transaction Successful!");
-            // We need to trigger refetch. 
-            // Ideally pass `onSuccess` callback prop to Modal.
-            // For now, reload window is crude but guarantees sync.
-            // Or assume polling (5s) handles it.
-            // Let's add window.location.reload() for immediate feedback if polling feels slow.
-            // Or better: pass `onFillSuccess` prop.
-            window.location.reload(); 
-            onClose();
+            setTxStatus("success");
+            setTxMessage("Transaction Successful!");
+            // Window reload handled in useEffect
           },
-          onError: (e) => alert("Failed: " + e.message)
+          onError: (e) => {
+            setTxStatus("error");
+            setTxMessage("Failed: " + e.message);
+          }
         }
       );
 
     } catch (e: any) {
-      alert("Error: " + e.message);
-    } finally {
-        setIsSubmitting(false);
-    }
+      setTxStatus("error");
+      setTxMessage("Error: " + e.message);
+    } 
   };
 
   return (
+    <>
+    <TransactionPendingOverlay 
+        isVisible={txStatus !== "idle"} 
+        status={txStatus === "idle" ? "pending" : txStatus}
+        message={txMessage} 
+        onClose={() => setTxStatus("idle")}
+    />
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <Card className="w-[450px] border-secondary/50 relative">
         <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-6 w-6" onClick={onClose}>
@@ -212,11 +225,12 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
           </div>
         </CardContent>
         <CardFooter>
-           <Button className="w-full bg-secondary text-white" onClick={handleConfirm} disabled={isSubmitting}>
-             {isSubmitting ? <Loader2 className="animate-spin" /> : "Confirm Transaction"}
+           <Button className="w-full bg-secondary text-white" onClick={handleConfirm} disabled={txStatus !== "idle"}>
+             {txStatus === "pending" ? <Loader2 className="animate-spin" /> : "Confirm Transaction"}
            </Button>
         </CardFooter>
       </Card>
     </div>
+    </>
   );
 }

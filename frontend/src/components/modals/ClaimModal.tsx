@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import { TransactionPendingOverlay } from "@/components/ui/TransactionPendingOverlay";
 import { X, Loader2, CheckCircle2 } from "lucide-react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
@@ -15,8 +16,19 @@ interface ClaimModalProps {
 export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
-  // const suiClient = useSuiClient(); // Kept for consistency/future upgrades
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [txStatus, setTxStatus] = useState<"pending" | "success" | "error" | "idle">("idle");
+  const [txMessage, setTxMessage] = useState("");
+  
+  // Auto-close success
+  useEffect(() => {
+    if (txStatus === "success") {
+        const t = setTimeout(() => {
+            setTxStatus("idle");
+            onClose();
+        }, 2000);
+        return () => clearTimeout(t);
+    }
+  }, [txStatus, onClose]);
 
   if (!isOpen || !note) return null;
 
@@ -32,23 +44,14 @@ export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
   
   const handleClaim = async () => {
     if (!currentAccount) return;
-    setIsSubmitting(true);
+    setTxStatus("pending");
+    setTxMessage("Claiming funds...");
 
     try {
       const tx = new Transaction();
       const packageId = TIDE_CONFIG.PACKAGE_ID;
       const usdcConfig = TIDE_CONFIG.COINS.USDC;
       const suiConfig = TIDE_CONFIG.COINS.SUI; // Collateral is SUI
-      
-      // Need to fetch loan object to know if it's repaid? 
-      // The contract checks specific logic. 
-      // For now we assume the user only clicked this because we showed it was claimable (based on Loan state in Portfolio)
-      
-      // We need to fetch the loan object ID to pass as mutable reference?
-      // Wait, claim function signature:
-      // public fun claim<CoinType, CollateralType>(loan: &mut Loan, note: LoanNote, ctx: &mut TxContext)
-      
-      // So we need the Loan Object ID. Note has `loan_id`.
       
       tx.moveCall({
          target: `${packageId}::loan::claim`,
@@ -64,21 +67,30 @@ export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
         {
           onSuccess: (result) => {
             console.log(result);
-            alert("Funds Claimed Successfully!");
-            onClose();
+            setTxStatus("success");
+            setTxMessage("Funds Claimed Successfully!");
           },
-          onError: (e) => alert("Claim failed: " + e.message)
+          onError: (e) => {
+             setTxStatus("error");
+             setTxMessage("Claim failed: " + e.message);
+          }
         }
       );
 
     } catch (e: any) {
-        alert("Error: " + e.message);
-    } finally {
-        setIsSubmitting(false);
-    }
+        setTxStatus("error");
+        setTxMessage("Error: " + e.message);
+    } 
   };
 
   return (
+    <>
+    <TransactionPendingOverlay 
+        isVisible={txStatus !== "idle"} 
+        status={txStatus === "idle" ? "pending" : txStatus}
+        message={txMessage} 
+        onClose={() => setTxStatus("idle")}
+    />
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <Card className="w-[400px] border-success/50 relative">
         <Button variant="ghost" size="icon" className="absolute right-2 top-2 h-6 w-6" onClick={onClose}>
@@ -106,11 +118,12 @@ export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
             </div>
         </CardContent>
         <CardFooter>
-            <Button className="w-full bg-success text-black hover:bg-success/90" onClick={handleClaim} disabled={isSubmitting}>
-                {isSubmitting ? <Loader2 className="animate-spin" /> : "Claim Funds"}
+            <Button className="w-full bg-success text-black hover:bg-success/90" onClick={handleClaim} disabled={txStatus !== "idle"}>
+                {txStatus === "pending" ? <Loader2 className="animate-spin" /> : "Claim Funds"}
             </Button>
         </CardFooter>
       </Card>
     </div>
+    </>
   );
 }

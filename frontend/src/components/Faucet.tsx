@@ -94,7 +94,7 @@ export function Faucet() {
   };
 
   return (
-    <Card className="bg-surface/50 border-surface-hover mb-6">
+    <Card className="border-primary/30 bg-gradient-to-br from-surface to-background h-full">
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>

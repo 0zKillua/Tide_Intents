@@ -36,7 +36,7 @@ export function Navbar() {
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
-            <span>Sui Mainnet</span>
+            <span>Sui Testnet</span>
           </div>
           <div>Gas: &lt; 0.01 SUI</div>
         </div>
