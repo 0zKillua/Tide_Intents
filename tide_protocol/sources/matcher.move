@@ -4,7 +4,7 @@ module tide::matcher {
     
     use tide::intents::{Self, LendOffer, BorrowRequest};
     use tide::loan::{Self};
-    use tide::constants;
+    use tide::protocol_constants as constants;
     use tide::errors;
 
     public fun match_intents<CoinType, CollateralType>(
@@ -37,8 +37,22 @@ module tide::matcher {
         // 4. Check LTV Safety (Gap)
         assert!(min_ltv_bps + constants::min_ltv_gap_bps() <= max_ltv_bps, errors::unsafe_ltv_gap());
 
-        // 5. Check Amounts
+        // 5. Check Amounts & Collateral (Assumes 1:1 Price Rate)
         assert!(request_amount >= min_fill_amount, errors::invalid_amount());
+        
+        // Collateral Validation (Hardcoded 1:1 rate)
+        // LTV = (Debt / CollateralValue) * 10000
+        // CollateralValue = CollateralAmount * 1 (1:1 Price)
+        // So: CollateralAmount * 1 >= (Debt * 10000) / MaxLTV
+        // Or simply: CollateralAmount >= Debt (if LTV is 100%)
+        // For safer LTV (e.g. 70%), CollateralAmount must be > Debt
+        
+        let (_, collateral_amt, _, _, request_ltv, _, _) = intents::borrow_request_info(&request);
+        let collateral_val = collateral_amt; // 1:1 price
+        let required_collateral_val = (((request_amount as u128) * 10000) / (request_ltv as u128)) as u64;
+        
+        // Ensure collateral covers the debt at the requested LTV
+        assert!(collateral_val >= required_collateral_val, errors::unsafe_ltv_gap());
         
         // === Execution ===
 
@@ -97,9 +111,13 @@ module tide::matcher {
         assert!(ltv_bps <= max_ltv_bps, errors::unsafe_ltv_gap());
         assert!(duration_ms <= max_duration_ms, errors::duration_mismatch());
         
-        // Check collateral sufficiency (simplified - in production use oracle)
-        let collateral_value = coin::value(&collateral);
-        assert!(collateral_value > 0, errors::invalid_amount());
+        // Check collateral sufficiency (Hardcoded 1:1 rate)
+        let collateral_amount = coin::value(&collateral);
+        let collateral_val = collateral_amount; // 1:1 price
+        
+        // Required Collateral >= (Debt * 10000) / LTV
+        let required_collateral = (((borrow_amount as u128) * 10000) / (ltv_bps as u128)) as u64;
+        assert!(collateral_val >= required_collateral, errors::unsafe_ltv_gap());
         
         // === Execution ===
         
@@ -142,7 +160,7 @@ module tide::matcher {
         ctx: &mut TxContext
     ) {
         let lender = tx_context::sender(ctx);
-        let (borrower, _collateral_val, request_amount, max_rate_bps, min_ltv_bps, duration_ms, request_expiry) = 
+        let (borrower, collateral_amount, request_amount, max_rate_bps, min_ltv_bps, duration_ms, request_expiry) = 
             intents::borrow_request_info(&request);
         
         // === Validations ===
@@ -151,6 +169,12 @@ module tide::matcher {
         
         let payment_value = coin::value(&payment);
         assert!(payment_value >= request_amount, errors::invalid_amount());
+
+        // Check collateral sufficiency (in case Request was created with bad LTV)
+        // Hardcoded 1:1 rate
+        let collateral_val = collateral_amount;
+        let required_collateral = (((request_amount as u128) * 10000) / (min_ltv_bps as u128)) as u64;
+        assert!(collateral_val >= required_collateral, errors::unsafe_ltv_gap());
         
         // === Execution ===
         

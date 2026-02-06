@@ -4,10 +4,10 @@ edition = "2024.beta"
 
 [dependencies]
 Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet-v1.58.1" }
+tide_tokens = { local = "../tide_tokens" }
+deepbook = { local = "../deepbookv3/packages/deepbook" }
+token = { local = "../deepbookv3/packages/token" }
 
 [addresses]
 tide = "0x0"
-
-[dev-dependencies]
-
-[dev-addresses]
+tide_tokens = "0xef553a6b8a00ac9c00d7983a24e4ca9a9748dcad02f0ab31bb8c502583ab1d0a"

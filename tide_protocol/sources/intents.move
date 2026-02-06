@@ -5,7 +5,7 @@ module tide::intents {
     use sui::event;
     use std::type_name::{get, into_string};
     
-    use tide::constants;
+    use tide::protocol_constants as constants;
     use tide::errors;
 
     // === Structs ===

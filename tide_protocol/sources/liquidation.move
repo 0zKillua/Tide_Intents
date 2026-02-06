@@ -5,20 +5,27 @@ module tide::liquidation {
     
     use tide::loan::{Self, Loan};
     use tide::oracle::{Self, PriceOracle};
-    use tide::math;
-    use tide::constants;
+    use tide::protocol_math as math;
+    use tide::protocol_constants as constants;
     use tide::errors;
+
+    use tide::deepbook_adapter;
+    use deepbook::pool::Pool;
 
     public struct LiquidationEvent has copy, drop {
         loan_id: ID,
         liquidator: address,
         debt_paid: u64,
-        collateral_seized: u64
+        collateral_seized: u64,
+        surplus_usdc: u64
     }
 
+    /// Liquidate a loan by seizing collateral, swapping it on DeepBook, 
+    /// and using proceeds to repay debt.
+    /// Caller receives the liquidation bonus (surplus proceeds).
     public fun liquidate<CoinType, CollateralType>(
         loan: &mut Loan<CoinType, CollateralType>,
-        mut payment: Coin<CoinType>,
+        pool: &mut Pool<CollateralType, CoinType>, // Collateral(SUI) -> Coin(USDC)
         oracle: &PriceOracle,
         clock: &Clock,
         ctx: &mut TxContext
@@ -36,43 +43,25 @@ module tide::liquidation {
         // Check if overdue
         let is_overdue = now > (loan::start_time(loan) + loan::duration(loan));
         
-        // Check Health Factor
+        // Check Health Factor (Oracle Logic)
         let price = oracle::get_price(oracle, clock);
-        let collateral_val = math::calculate_ltv(debt, (loan::collateral_balance(loan) as u64) * price); // This math might be tricky with decimals.
-        // Wait, math::calculate_ltv takes (principal, collateral_value). 
-        // collateral_value should be (amount * price).
-        // Let's assume price is scaled to 1e9? 
-        // We probably need a better math helper for Price * Amount -> Value.
+        let collateral_val_usd = (loan::collateral_balance(loan) * price) / constants::basis_points(); 
         
-        // Let's assume Price is 1:1 normalized for now or implement proper scaling later.
-        // For HackMoney MVP, let's assume price is "amount of CoinType per CollateralType unit".
-        
-        let collateral_value = (loan::collateral_balance(loan) * price) / constants::basis_points(); // Determine normalization
-        
-        let current_ltv = math::calculate_ltv(debt, collateral_value);
-        
+        let current_ltv = math::calculate_ltv(debt, collateral_val_usd);
         let is_unhealthy = current_ltv > loan::ltv_bps(loan);
 
         assert!(is_overdue || is_unhealthy, errors::not_liquidatable());
 
-        // 2. Execution
-        
-        let payment_val = coin::value(&payment);
-        assert!(payment_val >= debt, errors::insufficient_payment());
-
-        // Take Debt
-        let paid_coin = coin::split(&mut payment, debt, ctx);
-        let paid_balance = coin::into_balance(paid_coin);
-        
-        // Calculate Seize Amount
+        // 2. Calculate Seize Amount
         // seize_value = debt * (1 + bonus)
+        // This is in Collateral Token terms.
         let collateral_to_seize = math::calculate_collateral_to_seize(
             debt, 
             constants::liquidation_bonus_bps(), 
             price
         );
         
-        // Cap at total collateral (Bad Debt logic)
+        // Cap at total collateral
         let total_collateral = loan::collateral_balance(loan);
         let final_seize_amount = if (collateral_to_seize > total_collateral) {
             total_collateral
@@ -80,32 +69,57 @@ module tide::liquidation {
             collateral_to_seize
         };
 
-        // Execute on Loan
-        let seized_collateral = loan::execute_liquidation(
-            loan,
-            paid_balance,
-            final_seize_amount
+        // 3. Seize Collateral
+        let seized_balance = loan::seize_collateral(loan, final_seize_amount);
+        let seized_coin = coin::from_balance(seized_balance, ctx);
+
+        // 4. Swap on DeepBook (Sell SUI -> Buy USDC)
+        // Adapater: swap_exact_base_for_quote(pool, base_in, min_quote, clock, ctx)
+        // We require proceeds >= debt. (No bad debt support yet).
+        let (remainder_sui, mut proceeds_usdc) = deepbook_adapter::swap_exact_base_for_quote(
+            pool,
+            seized_coin,
+            debt, // Checks min output
+            clock,
+            ctx
         );
 
-        // Send check
-        if (coin::value(&payment) > 0) {
-            transfer::public_transfer(payment, tx_context::sender(ctx));
-        } else {
-            coin::destroy_zero(payment);
-        };
-        
-        // Send seized collateral to liquidator
-        let seized_coin = coin::from_balance(seized_collateral, ctx);
-        transfer::public_transfer(seized_coin, tx_context::sender(ctx));
+        // 5. Repay Debt
+        let proceeds_val = coin::value(&proceeds_usdc);
+        assert!(proceeds_val >= debt, errors::insufficient_payment());
 
-        // Return remaining collateral to borrower
+        let repayment_coin = coin::split(&mut proceeds_usdc, debt, ctx);
+        let repayment_balance = coin::into_balance(repayment_coin);
+
+        loan::resolve_liquidation(loan, repayment_balance);
+
+        // 6. Handle Surplus / Remainder
+        let surplus_val = coin::value(&proceeds_usdc);
+        
+        // Give surplus (Liquidation Bonus) to Caller
+        if (surplus_val > 0) {
+            transfer::public_transfer(proceeds_usdc, tx_context::sender(ctx));
+        } else {
+            coin::destroy_zero(proceeds_usdc);
+        };
+
+        // Give remainder SUI (Dust from swap) to Caller (or back to borrower?)
+        // Liquidator kept it in the seize calculation, so it's theirs.
+        if (coin::value(&remainder_sui) > 0) {
+            transfer::public_transfer(remainder_sui, tx_context::sender(ctx));
+        } else {
+            coin::destroy_zero(remainder_sui);
+        };
+
+        // Return remaining collateral (unseized) to borrower
         loan::return_remaining_collateral(loan, ctx);
 
         event::emit(LiquidationEvent {
             loan_id: object::id(loan),
             liquidator: tx_context::sender(ctx),
             debt_paid: debt,
-            collateral_seized: final_seize_amount
+            collateral_seized: final_seize_amount,
+            surplus_usdc: surplus_val
         });
     }
 }

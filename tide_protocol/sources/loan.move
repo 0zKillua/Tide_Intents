@@ -5,9 +5,9 @@ module tide::loan {
     use sui::event;
     use std::type_name::{get, into_string};
     
-    use tide::constants;
+    use tide::protocol_constants as constants;
     use tide::errors;
-    use tide::math;
+    use tide::protocol_math as math;
 
     // === Structs ===
 
@@ -232,6 +232,23 @@ module tide::loan {
         
         balance::join(&mut loan.repaid_funds, payment);
         balance::split(&mut loan.collateral, collateral_to_seize)
+    }
+
+    // === Internal Helpers for Atomic Liquidation ===
+
+    public(package) fun seize_collateral<CoinType, CollateralType>(
+        loan: &mut Loan<CoinType, CollateralType>,
+        amount: u64
+    ): Balance<CollateralType> {
+        balance::split(&mut loan.collateral, amount)
+    }
+
+    public(package) fun resolve_liquidation<CoinType, CollateralType>(
+        loan: &mut Loan<CoinType, CollateralType>,
+        payment: Balance<CoinType>
+    ) {
+        loan.state = STATE_LIQUIDATED;
+        balance::join(&mut loan.repaid_funds, payment);
     }
 
     // === Getters ===
