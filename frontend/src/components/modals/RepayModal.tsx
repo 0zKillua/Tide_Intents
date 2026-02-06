@@ -48,7 +48,7 @@ export function RepayModal({ isOpen, onClose, loan }: RepayModalProps) {
       const tx = new Transaction();
       const packageId = TIDE_CONFIG.PACKAGE_ID;
       const usdcConfig = TIDE_CONFIG.COINS.USDC;
-      const btcConfig = TIDE_CONFIG.COINS.BTC; // Assuming collateral is BTC for now, ideally dynamic
+      const suiConfig = TIDE_CONFIG.COINS.SUI; // Collateral is now SUI
       
       // Fetch USDC
       const coins = await suiClient.getCoins({
@@ -70,7 +70,7 @@ export function RepayModal({ isOpen, onClose, loan }: RepayModalProps) {
       
       tx.moveCall({
          target: `${packageId}::loan::repay`,
-         typeArguments: [usdcConfig.TYPE, btcConfig.TYPE], // Dynamic in real app
+         typeArguments: [usdcConfig.TYPE, suiConfig.TYPE],
          arguments: [
              tx.object(loan.objectId),
              paymentCoin,

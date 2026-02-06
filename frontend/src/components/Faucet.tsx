@@ -10,28 +10,25 @@ export function Faucet() {
   const { network } = useSuiClientContext();
   const { mutate: signAndExecuteTransaction } = useSignAndExecuteTransaction();
 
-  // Debugging log
   console.log("Current Application Network:", network);
 
-  const isLocal = network === 'local' || network === 'testnet'; // Allow testnet too
+  const isLocal = network === 'local' || network === 'testnet';
   
-  // Use client to manually inspect the object first
   const client = useSuiClientContext().client;
 
-  const mintToken = async (symbol: "USDC" | "BTC") => {
+  const mintUSDC = async () => {
     if (!currentAccount) {
         alert("Connect wallet first!");
         return;
     }
     
-    // We allow non-local for now just to see errors if any, but alert persists
     if (!isLocal) {
-        alert(`Wrong Network (${network}). Please switch your Phantom Wallet to "Testnet" or "Local".`);
+        alert(`Wrong Network (${network}). Please switch your Wallet to "Testnet".`);
         return;
     }
 
-    const config = symbol === "USDC" ? TIDE_CONFIG.COINS.USDC : TIDE_CONFIG.COINS.BTC;
-    const amount = symbol === "USDC" ? 1000 * 1e6 : 1 * 1e8; // 1000 USDC or 1 BTC
+    const config = TIDE_CONFIG.COINS.USDC;
+    const amount = 1000 * 1e6; // 1000 USDC
 
     try {
         console.log(`Fetching Treasury Cap: ${config.TREASURY_CAP}...`);
@@ -56,7 +53,6 @@ export function Faucet() {
         
         const tx = new Transaction();
         
-        // Construct the argument explicitly based on object type
         let treasuryArg;
         if (initialSharedVersion) {
             treasuryArg = tx.sharedObjectRef({
@@ -68,7 +64,6 @@ export function Faucet() {
             treasuryArg = tx.object(config.TREASURY_CAP);
         }
 
-        // Call sui::coin::mint_and_transfer(treasury_cap, amount, recipient)
         tx.moveCall({
           target: "0x2::coin::mint_and_transfer",
           typeArguments: [config.TYPE],
@@ -84,7 +79,7 @@ export function Faucet() {
           {
             onSuccess: (result: any) => {
               console.log("Minted!", result);
-              alert(`Successfully minted ${symbol}!`);
+              alert("Successfully minted 1,000 USDC!");
             },
             onError: (err: any) => {
               console.error("Mint failed", err);
@@ -103,8 +98,8 @@ export function Faucet() {
       <CardHeader>
         <div className="flex justify-between items-start">
             <div>
-                <CardTitle className="text-lg">Devnet Faucet</CardTitle>
-                <CardDescription>Mint test tokens for local development</CardDescription>
+                <CardTitle className="text-lg">Testnet Faucet</CardTitle>
+                <CardDescription>Mint USDC test tokens (Get SUI from Sui Faucet)</CardDescription>
             </div>
             {!isLocal && (
                 <div className="flex items-center gap-2 text-warning bg-warning/10 px-3 py-1 rounded-md border border-warning/20">
@@ -115,13 +110,11 @@ export function Faucet() {
         </div>
       </CardHeader>
       <CardContent className="flex gap-4">
-        <Button variant="outline" onClick={() => mintToken("USDC")} disabled={!isLocal}>
+        <Button variant="outline" onClick={mintUSDC} disabled={!isLocal}>
           Mint 1,000 USDC
-        </Button>
-        <Button variant="outline" onClick={() => mintToken("BTC")} disabled={!isLocal}>
-          Mint 1 BTC
         </Button>
       </CardContent>
     </Card>
   );
 }
+

@@ -137,8 +137,8 @@ export function MarketLend() {
               const typeString = req.content?.type || "";
               // Check if collateral (2nd arg) is USDC or BTC. 
               // BorrowRequest<Coin, Collateral>
-              const isBtcCollateral = typeString.includes("::mock_btc::MOCK_BTC"); 
-              const collateralDecimals = isBtcCollateral ? 8 : 6; // Default to 6 (USDC/SUI) if not BTC for this hackathon
+              const isSuiCollateral = typeString.includes("0x2::sui::SUI"); 
+              const collateralDecimals = isSuiCollateral ? 9 : 6;
               
               const collateralVal = parseInt(fields.collateral || "0") / Math.pow(10, collateralDecimals);
               const requestAmount =
@@ -156,7 +156,7 @@ export function MarketLend() {
                     <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center text-xs text-secondary">
                       C
                     </div>
-                    {collateralVal.toFixed(4)} {isBtcCollateral ? "BTC" : "USDC"}
+                    {collateralVal.toFixed(4)} {isSuiCollateral ? "SUI" : "USDC"}
                   </TableCell>
                   <TableCell>{requestAmount.toFixed(2)} USDC</TableCell>
                   <TableCell>

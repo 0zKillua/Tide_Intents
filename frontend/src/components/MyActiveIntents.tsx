@@ -24,11 +24,10 @@ export function MyActiveIntents({ lendOffers, borrowRequests }: { lendOffers: an
       const packageId = TIDE_CONFIG.PACKAGE_ID;
       
       // We need CoinType and CollateralType. 
-      // For MVP, we know LendOffer uses <CoinType> (USDC) and BorrowRequest uses <CoinType, CollateralType> (USDC, BTC)
-      // Ideally we extract this from the object type string `0x...::intents::LendOffer<0x...::mock_usdc::MOCK_USDC>`
+      // For MVP, we know LendOffer uses <CoinType> (USDC) and BorrowRequest uses <CoinType, CollateralType> (USDC, SUI)
       
       const usdcType = TIDE_CONFIG.COINS.USDC.TYPE;
-      const btcType = TIDE_CONFIG.COINS.BTC.TYPE;
+      const suiType = TIDE_CONFIG.COINS.SUI.TYPE;
 
       if (isLend) {
           tx.moveCall({
@@ -39,7 +38,7 @@ export function MyActiveIntents({ lendOffers, borrowRequests }: { lendOffers: an
       } else {
           tx.moveCall({
               target: `${packageId}::intents::cancel_borrow_request`,
-              typeArguments: [usdcType, btcType],
+              typeArguments: [usdcType, suiType],
               arguments: [tx.object(objectId)]
           });
       }

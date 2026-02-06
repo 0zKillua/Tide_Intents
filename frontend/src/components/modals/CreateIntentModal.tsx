@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,7 +13,7 @@ interface CreateIntentModalProps {
   type: "Lend" | "Borrow";
 }
 
-type TokenKey = "USDC" | "BTC";
+type TokenKey = "USDC" | "SUI";
 
 export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalProps) {
   const currentAccount = useCurrentAccount();
@@ -24,7 +24,15 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
   const [collateralAmount, setCollateralAmount] = useState("");
   const [principalAmount, setPrincipalAmount] = useState(""); // Used for Lend amount too
   
-  const [selectedToken, setSelectedToken] = useState<TokenKey>(type === "Lend" ? "USDC" : "BTC");
+  // Dynamic Tokens based on Type
+  const tokens: TokenKey[] = type === "Lend" ? ["USDC"] : ["SUI"];
+  const [selectedToken, setSelectedToken] = useState<TokenKey>(tokens[0]);
+
+  // Reset selected token when type changes
+  useEffect(() => {
+    setSelectedToken(type === "Lend" ? "USDC" : "SUI");
+  }, [type]);
+  
   const [rate, setRate] = useState("500"); // BPS
   const [ltv, setLtv] = useState("70"); // % used for converting to BPS
   const [duration, setDuration] = useState("30"); // Days
@@ -51,35 +59,39 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
       
       const tokenConfig = TIDE_CONFIG.COINS[selectedToken];
       
-      // Fetch coins
-      const coins = await suiClient.getCoins({
-        owner: currentAccount.address,
-        coinType: tokenConfig.TYPE,
-      });
-      
       if (type === "Lend") {
-        // LEND: User provides PRINCIPAL (USDC or BTC). 
+        // LEND: User provides PRINCIPAL (USDC). 
         // We use principalAmount input.
+        // NOTE: For this demo, we only have one market <USDC, SUI>.
+        // Lenders lend USDC.
+        const usdcConfig = TIDE_CONFIG.COINS.USDC;
         const amountNum = parseFloat(principalAmount);
+        
+        // Fetch USDC coins instead if lending
+        const usdcCoins = await suiClient.getCoins({
+             owner: currentAccount.address,
+             coinType: usdcConfig.TYPE
+        });
+
         if (isNaN(amountNum) || amountNum <= 0) { throw new Error("Invalid lend amount"); }
         
-        const amountRaw = Math.floor(amountNum * Math.pow(10, tokenConfig.DECIMALS));
+        const amountRaw = Math.floor(amountNum * Math.pow(10, usdcConfig.DECIMALS));
         
         // Coin Logic
-        if (!coins.data || coins.data.length === 0) throw new Error("No coins found");
-        let primaryCoinId = coins.data[0].coinObjectId;
-        const totalBalance = coins.data.reduce((acc, c) => acc + parseInt(c.balance), 0);
+        if (!usdcCoins.data || usdcCoins.data.length === 0) throw new Error("No coins found");
+        let primaryCoinId = usdcCoins.data[0].coinObjectId;
+        const totalBalance = usdcCoins.data.reduce((acc, c) => acc + parseInt(c.balance), 0);
         if (totalBalance < amountRaw) throw new Error("Insufficient balance");
         
-        if (coins.data.length > 1) {
-             const otherCoins = coins.data.slice(1).map(c => c.coinObjectId);
+        if (usdcCoins.data.length > 1) {
+             const otherCoins = usdcCoins.data.slice(1).map(c => c.coinObjectId);
              tx.mergeCoins(tx.object(primaryCoinId), otherCoins.map(id => tx.object(id)));
         }
         const [paymentCoin] = tx.splitCoins(tx.object(primaryCoinId), [amountRaw]);
 
         tx.moveCall({
           target: `${packageId}::intents::create_lend_offer`,
-          typeArguments: [tokenConfig.TYPE],
+          typeArguments: [usdcConfig.TYPE],
           arguments: [
             paymentCoin,
             tx.pure.u64(rateBps),
@@ -93,7 +105,7 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
         });
 
       } else {
-        // BORROW: User provides COLLATERAL (e.g. BTC) and asks for PRINCIPAL (e.g. USDC).
+        // BORROW: User provides COLLATERAL (SUI) and asks for PRINCIPAL (USDC).
         
         const colAmountNum = parseFloat(collateralAmount);
         const reqAmountNum = parseFloat(principalAmount);
@@ -101,28 +113,18 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
         if (isNaN(colAmountNum) || colAmountNum <= 0) throw new Error("Invalid collateral amount");
         if (isNaN(reqAmountNum) || reqAmountNum <= 0) throw new Error("Invalid borrow amount");
 
-        const colRaw = Math.floor(colAmountNum * Math.pow(10, tokenConfig.DECIMALS)); // Collateral decimals
-        const principalConfig = TIDE_CONFIG.COINS.USDC; // Assuming we borrow USDC against others for now
+        const colRaw = Math.floor(colAmountNum * Math.pow(10, tokenConfig.DECIMALS)); // Collateral decimals (SUI = 9)
+        const principalConfig = TIDE_CONFIG.COINS.USDC; 
         const reqRaw = Math.floor(reqAmountNum * Math.pow(10, principalConfig.DECIMALS));
         
-        // Coin Logic for Collateral
-        if (!coins.data || coins.data.length === 0) throw new Error("No collateral coins found");
-        let primaryCoinId = coins.data[0].coinObjectId;
-        
-        const totalBalance = coins.data.reduce((acc, c) => acc + parseInt(c.balance), 0);
-        if (totalBalance < colRaw) throw new Error("Insufficient collateral balance");
-
-        if (coins.data.length > 1) {
-             const otherCoins = coins.data.slice(1).map(c => c.coinObjectId);
-             tx.mergeCoins(tx.object(primaryCoinId), otherCoins.map(id => tx.object(id)));
-        }
-        const [paymentCoin] = tx.splitCoins(tx.object(primaryCoinId), [colRaw]);
+        // For native SUI, split directly from gas coin (simplest and most reliable approach)
+        const [collateralCoin] = tx.splitCoins(tx.gas, [colRaw]);
 
         tx.moveCall({
           target: `${packageId}::intents::create_borrow_request`,
-          typeArguments: [principalConfig.TYPE, tokenConfig.TYPE], // CoinType(USDC), CollateralType(BTC)
+          typeArguments: [principalConfig.TYPE, tokenConfig.TYPE], // CoinType(USDC), CollateralType(SUI)
           arguments: [
-            paymentCoin,                                    // collateral: Coin<CollateralType>
+            collateralCoin,                                 // collateral: Coin<CollateralType>
             tx.pure.u64(reqRaw),                            // request_amount
             tx.pure.u64(rateBps),                           // max_rate_bps
             tx.pure.u64(parseInt(ltv) * 100),               // Min LTV BPS
@@ -156,8 +158,6 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
       setIsSubmitting(false);
     }
   };
-
-  const tokens: TokenKey[] = type === "Lend" ? ["USDC", "BTC"] : ["BTC", "USDC"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">

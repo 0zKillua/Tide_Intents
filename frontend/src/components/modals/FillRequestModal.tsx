@@ -46,7 +46,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
 
   // Derived values based on fillAmount
   const currentAmount = parseFloat(fillAmount) || 0;
-  const MOCK_BTC_PRICE_USD = 50000;
+  const MOCK_SUI_PRICE_USD = 2;
   
   const rate = isLender 
       ? parseInt(fields.max_rate_bps || '0') / 100
@@ -61,7 +61,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
   
   // Calculate Collateral
   const collateralValueUSD = currentAmount / (ltvPercent / 100);
-  const collateralRequired = collateralValueUSD / MOCK_BTC_PRICE_USD;
+  const collateralRequired = collateralValueUSD / MOCK_SUI_PRICE_USD;
 
   const handleConfirm = async () => {
     if (!currentAccount) {
@@ -81,7 +81,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
       const tx = new Transaction();
       const packageId = TIDE_CONFIG.PACKAGE_ID;
       const usdcConfig = TIDE_CONFIG.COINS.USDC;
-      const btcConfig = TIDE_CONFIG.COINS.BTC;
+      const suiConfig = TIDE_CONFIG.COINS.SUI;
       
       const amountRaw = Math.floor(currentAmount * Math.pow(10, usdcConfig.DECIMALS));
       
@@ -89,7 +89,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         // Filling a BorrowRequest (Lender)
         // User provides Principal (USDC)
         const coins = await suiClient.getCoins({ owner: currentAccount.address, coinType: usdcConfig.TYPE });
-        if (!coins.data.length) throw new Error(`No ${usdcConfig.SYMBOL} found`);
+        if (!coins.data.length) throw new Error("No USDC found");
         
         // Merge & Split to get exact amount
         const primaryCoin = coins.data[0];
@@ -100,7 +100,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         
         tx.moveCall({
           target: `${packageId}::matcher::fill_borrow_request`,
-          typeArguments: [usdcConfig.TYPE, btcConfig.TYPE], // Coin, Collateral
+          typeArguments: [usdcConfig.TYPE, suiConfig.TYPE], // Coin, Collateral
           arguments: [
             tx.object(offerId),
             paymentCoin,
@@ -110,12 +110,12 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         
       } else {
         // Filling a LendOffer (Borrower)
-        const collateralRaw = Math.ceil(collateralRequired * Math.pow(10, btcConfig.DECIMALS));
+        const collateralRaw = Math.ceil(collateralRequired * Math.pow(10, suiConfig.DECIMALS));
         const ltvBps = Math.floor(ltvPercent * 100);
         
         // Get Coins
-        const coins = await suiClient.getCoins({ owner: currentAccount.address, coinType: btcConfig.TYPE });
-        if (!coins.data.length) throw new Error("No BTC found");
+        const coins = await suiClient.getCoins({ owner: currentAccount.address, coinType: suiConfig.TYPE });
+        if (!coins.data.length) throw new Error("No SUI found");
         
         // Merge & Split
         const primaryCoin = coins.data[0];
@@ -126,7 +126,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
         
         tx.moveCall({
           target: `${packageId}::matcher::fill_lend_offer`,
-          typeArguments: [usdcConfig.TYPE, btcConfig.TYPE],
+          typeArguments: [usdcConfig.TYPE, suiConfig.TYPE],
           arguments: [
             tx.object(offerId),
             collateralCoin,
@@ -201,7 +201,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
                <>
                  <div className="flex justify-between items-center">
                     <span className="text-gray-400">Collateral Required</span>
-                    <span className="text-white font-mono">{collateralRequired.toFixed(6)} BTC</span>
+                    <span className="text-white font-mono">{collateralRequired.toFixed(6)} SUI</span>
                  </div>
                  <div className="flex justify-between items-center text-xs">
                     <span className="text-gray-500">LTV / Duration</span>

@@ -38,7 +38,7 @@ export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
       const tx = new Transaction();
       const packageId = TIDE_CONFIG.PACKAGE_ID;
       const usdcConfig = TIDE_CONFIG.COINS.USDC;
-      const btcConfig = TIDE_CONFIG.COINS.BTC; 
+      const suiConfig = TIDE_CONFIG.COINS.SUI; // Collateral is SUI
       
       // Need to fetch loan object to know if it's repaid? 
       // The contract checks specific logic. 
@@ -52,7 +52,7 @@ export function ClaimModal({ isOpen, onClose, note }: ClaimModalProps) {
       
       tx.moveCall({
          target: `${packageId}::loan::claim`,
-         typeArguments: [usdcConfig.TYPE, btcConfig.TYPE],
+         typeArguments: [usdcConfig.TYPE, suiConfig.TYPE],
          arguments: [
              tx.object(loanId), // The Loan Object (Shared)
              tx.object(note.objectId) // The Note Object (Owned)

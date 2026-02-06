@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIntents } from "@/hooks/useIntents";
 import { useLoans } from "@/hooks/useLoans";
 import { useLoanNotes } from "@/hooks/useLoanNotes";
+import { useHistory } from "@/hooks/useHistory";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { RepayModal } from "@/components/modals/RepayModal";
 import { ClaimModal } from "@/components/modals/ClaimModal";
@@ -23,9 +24,11 @@ export function Portfolio() {
   const { lendOffers, borrowRequests, refetch } = useIntents();
   const { loans, isLoading: isLoansLoading } = useLoans();
   const { notes, isLoading: isNotesLoading } = useLoanNotes();
+  const { history } = useHistory();
   const [selectedLoan, setSelectedLoan] = useState<any>(null);
   const [selectedClaimNote, setSelectedClaimNote] = useState<any>(null);
   const [isCancelling, setIsCancelling] = useState(false);
+
 
   const handleCancelLend = async (offerId: string, coinType: string) => {
     if (isCancelling) return;
@@ -41,7 +44,7 @@ export function Portfolio() {
         signAndExecuteTransaction({ transaction: tx }, {
             onSuccess: () => {
                 alert("Offer cancelled successfully");
-                window.location.reload(); // Force refresh
+                refetch();
             },
             onError: (e) => alert("Failed to cancel: " + e.message)
         });
@@ -66,7 +69,7 @@ export function Portfolio() {
         signAndExecuteTransaction({ transaction: tx }, {
             onSuccess: () => {
                 alert("Request cancelled successfully");
-                window.location.reload();
+                refetch();
             },
             onError: (e) => alert("Failed to cancel: " + e.message)
         });
@@ -88,14 +91,29 @@ export function Portfolio() {
 
   // Filter Active Intents
   const myLendOffers = lendOffers.filter((o: any) => {
-      const provider = o.content?.fields?.provider;
-      const assetVal = parseInt(o.content?.fields?.asset?.fields?.value || '0');
+      const fields = o.content?.fields || o;
+      const provider = fields?.provider;
+      // Handle different Balance serialization formats
+      const assetValue = fields.asset?.fields?.value || fields.asset?.value || fields.asset || '0';
+      const assetVal = parseInt(assetValue);
+      
+      console.log("[Portfolio Debug] LendOffer:", { 
+          objectId: o.objectId, 
+          provider, 
+          myAddress: currentAccount.address, 
+          match: provider === currentAccount.address,
+          assetVal 
+      });
+      
       return provider === currentAccount.address && assetVal > 0;
   });
 
   const myBorrowRequests = borrowRequests.filter((r: any) => {
-      const borrower = r.content?.fields?.borrower;
-      const collateralVal = parseInt(r.content?.fields?.collateral || '0');
+      const fields = r.content?.fields || r;
+      const borrower = fields?.borrower;
+      // Handle different Balance serialization formats
+      const collateralValue = fields.collateral?.fields?.value || fields.collateral?.value || fields.collateral || '0';
+      const collateralVal = parseInt(collateralValue);
       return borrower === currentAccount.address && collateralVal > 0;
   });
 
@@ -134,8 +152,10 @@ export function Portfolio() {
                                 <TableRow><TableCell colSpan={5} className="text-center py-8 text-gray-500">No active lend offers.</TableCell></TableRow>
                             )}
                             {myLendOffers.map((offer: any) => {
-                                const fields = offer.content.fields;
-                                const remaining = parseInt(fields.asset?.fields?.value || '0') / 1e6;
+                                const fields = offer.content?.fields || offer;
+                                // Use same fallback logic as filter
+                                const assetValue = fields.asset?.fields?.value || fields.asset?.value || fields.asset || '0';
+                                const remaining = parseInt(assetValue) / 1e6;
                                 return (
                                     <TableRow key={offer.objectId}>
                                         <TableCell className="font-mono text-white">{remaining.toLocaleString()} USDC</TableCell>
@@ -180,14 +200,14 @@ export function Portfolio() {
                             {myBorrowRequests.map((req: any) => {
                                 const fields = req.content.fields;
                                 const typeString = req.content?.type || "";
-                                const isBtcCollateral = typeString.includes("::mock_btc::MOCK_BTC");
-                                const colDecimals = isBtcCollateral ? 8 : 6;
+                                const isSuiCollateral = typeString.includes("0x2::sui::SUI");
+                                const colDecimals = isSuiCollateral ? 9 : 6;
                                 
                                 const collateral = parseInt(fields.collateral || '0') / Math.pow(10, colDecimals);
                                 const requesting = parseInt(fields.request_amount || '0') / 1e6;
                                 return (
                                     <TableRow key={req.objectId}>
-                                        <TableCell className="font-mono text-white">{collateral.toFixed(6)} {isBtcCollateral ? "BTC" : "USDC"}</TableCell>
+                                        <TableCell className="font-mono text-white">{collateral.toFixed(6)} {isSuiCollateral ? "SUI" : "USDC"}</TableCell>
                                         <TableCell>{requesting.toLocaleString()} USDC</TableCell>
                                         <TableCell>{(parseInt(fields.max_rate_bps) / 100).toFixed(2)}%</TableCell>
                                         <TableCell><Badge className="bg-warning/20 text-warning">Pending</Badge></TableCell>
@@ -197,7 +217,7 @@ export function Portfolio() {
                                                 size="sm" 
                                                 disabled={isCancelling}
                                                 onClick={() => {
-                                                    const colType = isBtcCollateral ? TIDE_CONFIG.COINS.BTC.TYPE : TIDE_CONFIG.COINS.USDC.TYPE;
+                                                    const colType = isSuiCollateral ? TIDE_CONFIG.COINS.SUI.TYPE : TIDE_CONFIG.COINS.USDC.TYPE;
                                                     handleCancelBorrow(req.objectId, TIDE_CONFIG.COINS.USDC.TYPE, colType);
                                                 }}
                                             >
@@ -237,8 +257,8 @@ export function Portfolio() {
                                 if (loan.state !== 0) return null; // Only Active
                                 const principal = parseInt(loan.principal) / 1e6;
                                 const typeString = loan.content?.type || ""; // Loan<Coin, Collateral>
-                                const isBtcCollateral = typeString.includes("::mock_btc::MOCK_BTC");
-                                const colDecimals = isBtcCollateral ? 8 : 6;
+                                const isSuiCollateral = typeString.includes("0x2::sui::SUI");
+                                const colDecimals = isSuiCollateral ? 9 : 6;
                                 const collateral = parseInt(loan.collateral) / Math.pow(10, colDecimals);
                                 const rate = parseInt(loan.interest_rate_bps) / 100;
                                 const date = new Date(parseInt(loan.start_time_ms));
@@ -246,7 +266,7 @@ export function Portfolio() {
                                 return (
                                     <TableRow key={loan.objectId}>
                                         <TableCell className="font-bold text-white">{principal.toLocaleString()} USDC</TableCell>
-                                        <TableCell className="font-mono">{collateral.toFixed(6)} {isBtcCollateral ? "BTC" : "USDC"}</TableCell>
+                                        <TableCell className="font-mono">{collateral.toFixed(6)} {isSuiCollateral ? "SUI" : "USDC"}</TableCell>
                                         <TableCell className="text-warning">{rate.toFixed(2)}%</TableCell>
                                         <TableCell className="text-gray-400">{date.toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
@@ -283,39 +303,24 @@ export function Portfolio() {
                                 const rate = parseInt(note.interest_rate_bps) / 100;
                                 const loanId = note.loan_id?.id || note.loan_id;
                                 
-                                // Find correlated loan state if available (from full loans list if we had it, but loans hook only gets Borrowed loans)
-                                // We actually need to fetch the specific loan for the note to know status.
-                                // For now, we will optimistically assume if we can see it, we can check it.
-                                // LIMITATION: useLoans only gets MY loans (borrower). Even if we used getObject, we need the ID.
-                                // Note has the ID.
-                                // TODO: We should probably fetch these loan states in useLoanNotes or a separate query.
-                                // For MVP: We will enable the button always but it will fail if not ready?
-                                // Better: Check if we have the loan in context? No, we might not be the borrower.
-                                // Quick fix: Let's assume Active for now, but if we updated the hooks we could get it.
-                                // Actually, let's just show "Check Status" or let them try to claim.
-                                // OR: update useLoanNotes to also fetch the loan objects? 
-                                // Let's simplify: Just always show "Claim" if it's been enough time? No.
-                                // Let's just leave it as "Wait" and "Claim" but we need the status.
+                                // loanState is now fetched from the Loan object via useLoanNotes hook
+                                // 0=Active, 1=Repaid, 2=Liquidated
+                                const loanState: number = note.loanState ?? 0;
                                 
-                                // HACK: For this step, I will map it, but since we don't have the loan state loaded for notes,
-                                // I will hardcode the logic to: If I click claim, it tries. 
-                                // But real UI needs state.
-                                // Let's just update the button to "Manage" which opens ClaimModal, 
-                                // and ClaimModal can blindly try or we accept we need more data.
+                                const getStatusBadge = () => {
+                                    if (loanState === 1) return <Badge className="bg-success/20 text-success">Repaid</Badge>;
+                                    if (loanState === 2) return <Badge className="bg-red-500/20 text-red-400">Liquidated</Badge>;
+                                    return <Badge variant="outline" className="text-gray-400">Active</Badge>;
+                                };
                                 
-                                // Actually, I'll update the logic to just show the button for demo purposes or
-                                // if I can find the loan in a "All Loans" list.
-                                
-                                // REAL FIX: Let's use a mock state for now or just allow clicking "Claim" to check.
-                                const loanState: number = 0; // Default active
                                 return (
                                     <TableRow key={note.objectId}>
                                         <TableCell className="font-bold text-white">{principal.toLocaleString()} USDC</TableCell>
                                         <TableCell className="text-success">{rate.toFixed(2)}%</TableCell>
                                         <TableCell className="font-mono text-xs text-gray-500">{typeof loanId === 'string' ? loanId.slice(0, 8) : '...' }...</TableCell>
-                                        <TableCell><Badge variant="outline" className="text-gray-400">Monitoring</Badge></TableCell>
+                                        <TableCell>{getStatusBadge()}</TableCell>
                                         <TableCell className="text-right">
-                                            {loanState === 1 || loanState === 2 ? (
+                                            {loanState >= 1 ? (
                                                 <Button size="sm" className="bg-success text-black hover:bg-success/90" onClick={() => setSelectedClaimNote(note)}>Claim</Button>
                                             ) : (
                                                 <Button size="sm" variant="secondary" disabled>Wait for Repay</Button>
@@ -332,8 +337,51 @@ export function Portfolio() {
 
         {/* Tab 3: History */}
         <TabsContent value="history" className="space-y-4 mt-6">
-            <Card className="bg-surface/50 border-surface-hover p-8 text-center">
-                <p className="text-gray-400">Transaction history will appear here.</p>
+            <Card className="bg-surface/50 border-surface-hover">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Event</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead className="text-right">Transaction</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {history.length === 0 && (
+                            <TableRow><TableCell colSpan={4} className="text-center py-8 text-gray-500">No transaction history yet.</TableCell></TableRow>
+                        )}
+                        {history.map((event, idx) => (
+                            <TableRow key={idx}>
+                                <TableCell>
+                                    <Badge className={
+                                        event.type === "Loan Repaid" ? "bg-success/20 text-success" :
+                                        event.type === "Loan Claimed" ? "bg-primary/20 text-primary" :
+                                        "bg-secondary/20 text-secondary"
+                                    }>
+                                        {event.type}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="font-mono text-white">
+                                    {event.data.principal?.toFixed(2) || event.data.amount?.toFixed(2) || '-'} USDC
+                                </TableCell>
+                                <TableCell className="text-gray-400">
+                                    {new Date(event.timestamp).toLocaleDateString()}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                    <a 
+                                        href={`https://suiscan.xyz/testnet/tx/${event.digest}`} 
+                                        target="_blank" 
+                                        rel="noopener noreferrer"
+                                        className="text-xs text-secondary hover:underline"
+                                    >
+                                        {event.digest.slice(0, 8)}...
+                                    </a>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </Card>
         </TabsContent>
 
