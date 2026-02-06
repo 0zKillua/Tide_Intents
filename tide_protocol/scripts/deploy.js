@@ -1,23 +1,3 @@
-#!/usr/bin/env node
-/**
- * Tide Protocol - Automated Deploy & Configure Script
- * 
- * Usage:
- *   node scripts/deploy.js [network]
- * 
- * Examples:
- *   node scripts/deploy.js testnet
- *   node scripts/deploy.js local
- *   node scripts/deploy.js devnet
- * 
- * This script will:
- * 1. Publish the package to the specified network
- * 2. Extract all created objects (Package, AdminCap, TreasuryCaps, etc.)
- * 3. Optionally create a Market
- * 4. Update frontend/src/tide_config.ts automatically
- * 5. Save deployment info to deployed_config.json
- */
-
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
@@ -26,6 +6,11 @@ const path = require('path');
 const FRONTEND_CONFIG_PATH = path.join(__dirname, '..', '..', 'frontend', 'src', 'tide_config.ts');
 const DEPLOYED_CONFIG_PATH = path.join(__dirname, '..', 'deployed_config.json');
 const GAS_BUDGET = 500000000; // 0.5 SUI
+
+// Token Package (Previously Deployed)
+// If you redeploy tide_tokens, update this!
+const TIDE_TOKENS_PACKAGE_ID = "0xef553a6b8a00ac9c00d7983a24e4ca9a9748dcad02f0ab31bb8c502583ab1d0a"; 
+const MOCK_USDC_TYPE = `${TIDE_TOKENS_PACKAGE_ID}::mock_usdc::MOCK_USDC`;
 
 // Colors for console output
 const colors = {
@@ -101,6 +86,7 @@ async function main() {
     logStep('2/6', 'Publishing package...');
     log('  This may take a minute...', 'yellow');
     
+    // We only publish tide_protocol here, assuming tide_tokens is already set in Move.toml
     const publishResult = runCommandJSON(`sui client publish --gas-budget ${GAS_BUDGET} --json`);
     
     if (publishResult.effects?.status?.status !== 'success') {
@@ -127,22 +113,21 @@ async function main() {
     );
     const adminCapId = adminCap?.objectId;
     log(`  🔑 AdminCap ID: ${adminCapId}`, 'green');
-    
-    // TreasuryCaps
-    const treasuryCaps = objectChanges.filter(o => 
-        o.objectType && o.objectType.includes('TreasuryCap')
-    );
-    
-    const usdcCap = treasuryCaps.find(o => o.objectType.includes('mock_usdc'));
-    const btcCap = treasuryCaps.find(o => o.objectType.includes('mock_btc'));
-    const suiCap = treasuryCaps.find(o => o.objectType.includes('mock_sui'));
-    
-    log(`  💵 USDC TreasuryCap: ${usdcCap?.objectId}`, 'green');
-    log(`  ₿  BTC TreasuryCap: ${btcCap?.objectId}`, 'green');
-    if (suiCap) log(`  💧 SUI TreasuryCap: ${suiCap?.objectId}`, 'green');
 
-    // Step 4: Create Market (Optional)
-    logStep('4/6', 'Creating USDC/BTC Market...');
+    // PauseCap
+    const pauseCap = objectChanges.find(o => 
+        o.objectType && o.objectType.includes('::market::PauseCap')
+    );
+    log(`  ⏸️  PauseCap ID: ${pauseCap?.objectId}`, 'green');
+    
+    // Registry (ProtocolInfo)
+    const registry = objectChanges.find(o => 
+        o.objectType && o.objectType.includes('::tide::ProtocolInfo')
+    );
+    log(`  📋 Registry ID: ${registry?.objectId}`, 'green');
+
+    // Step 4: Create Market (MOCK_USDC / SUI)
+    logStep('4/6', 'Creating MOCK_USDC / SUI Market...');
     
     let marketId = '0x0000000000000000000000000000000000000000000000000000000000000000';
     
@@ -151,7 +136,7 @@ async function main() {
             --package ${packageId} \
             --module market \
             --function create_market \
-            --type-args ${packageId}::mock_usdc::MOCK_USDC ${packageId}::mock_btc::MOCK_BTC \
+            --type-args ${MOCK_USDC_TYPE} 0x2::sui::SUI \
             --args ${adminCapId} \
             --gas-budget 100000000 \
             --json`);
@@ -175,12 +160,13 @@ async function main() {
         PACKAGE_ID: packageId,
         ADMIN_CAP_ID: adminCapId,
         MARKET_ID: marketId,
-        USDC_CAP_ID: usdcCap?.objectId,
-        BTC_CAP_ID: btcCap?.objectId,
-        SUI_CAP_ID: suiCap?.objectId,
-        MOCK_USDC_TYPE: `${packageId}::mock_usdc::MOCK_USDC`,
-        MOCK_BTC_TYPE: `${packageId}::mock_btc::MOCK_BTC`,
-        MOCK_SUI_TYPE: `${packageId}::mock_sui::MOCK_SUI`,
+        PAUSE_CAP_ID: pauseCap?.objectId,
+        REGISTRY_ID: registry?.objectId,
+        
+        // Tokens
+        MOCK_USDC_TYPE: MOCK_USDC_TYPE,
+        MOCK_SUI_TYPE: "0x2::sui::SUI",
+        
         DEPLOYED_AT: new Date().toISOString(),
         DEPLOY_TX: publishResult.digest,
     };
@@ -196,23 +182,23 @@ async function main() {
 // TX: ${publishResult.digest}
 
 export const TIDE_CONFIG = {
-    NETWORK: '${network}',
-    PACKAGE_ID: '${packageId}',
-    ADMIN_CAP_ID: '${adminCapId}',
-    MARKET_ID: '${marketId}',
+    PACKAGE_ID: "${packageId}",
+    MARKET_ID: "${marketId}",
+    PAUSE_CAP_ID: "${pauseCap?.objectId}",
+    ADMIN_CAP_ID: "${adminCapId}",
+    REGISTRY_ID: "${registry?.objectId}",
     
+    // Tokens
     COINS: {
         USDC: {
-            TYPE: '${packageId}::mock_usdc::MOCK_USDC',
-            TREASURY_CAP: '${usdcCap?.objectId}',
+            TYPE: "${MOCK_USDC_TYPE}",
             DECIMALS: 6,
-            SYMBOL: 'USDC'
+            ICON_URL: "https://cryptologos.cc/logos/usd-coin-usdc-logo.png"
         },
-        BTC: {
-            TYPE: '${packageId}::mock_btc::MOCK_BTC',
-            TREASURY_CAP: '${btcCap?.objectId}',
-            DECIMALS: 8,
-            SYMBOL: 'BTC'
+        SUI: {
+            TYPE: "0x2::sui::SUI",
+            DECIMALS: 9, 
+            ICON_URL: "https://cryptologos.cc/logos/sui-sui-logo.png"
         }
     }
 };
