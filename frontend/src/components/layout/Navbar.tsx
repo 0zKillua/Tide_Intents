@@ -1,6 +1,50 @@
 import { ConnectButton } from "@mysten/dapp-kit";
 import { Link } from "react-router-dom";
 import { TideLogo } from "@/components/ui/TideLogo";
+import { Menu, X, LayoutDashboard, TrendingUp, TrendingDown, ListTodo, BarChart3 } from "lucide-react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+
+const navLinks = [
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Market: Lend", href: "/market/lend", icon: TrendingUp },
+  { name: "Market: Borrow", href: "/market/borrow", icon: TrendingDown },
+  { name: "Portfolio", href: "/portfolio", icon: ListTodo },
+  { name: "Analytics", href: "/analytics", icon: BarChart3 },
+];
+
+function MobileNav() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div className="lg:hidden">
+      <button 
+        onClick={() => setIsOpen(!isOpen)} 
+        className="p-2 text-gray-400 hover:text-white transition-colors"
+      >
+        {isOpen ? <X size={24} /> : <Menu size={24} />}
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-16 left-0 w-full bg-[#0a0c10] border-b border-surface-hover shadow-xl animate-in slide-in-from-top-2 z-50">
+          <div className="flex flex-col p-4 space-y-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                to={link.href}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white hover:bg-white/5 rounded-md transition-colors"
+              >
+                <link.icon className="w-4 h-4" />
+                {link.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Navbar() {
   return (
@@ -24,7 +68,9 @@ export function Navbar() {
           <div>Gas: &lt; 0.01 SUI</div>
         </div>
         
+        
         <ConnectButton className="!bg-primary !text-white !font-semibold !rounded-md hover:!opacity-90 transition-opacity" />
+        <MobileNav />
       </div>
     </nav>
   );
