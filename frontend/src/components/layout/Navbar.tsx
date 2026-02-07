@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { TideLogo } from "@/components/ui/TideLogo";
 import { Menu, X, LayoutDashboard, TrendingUp, TrendingDown, ListTodo, BarChart3 } from "lucide-react";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 const navLinks = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
