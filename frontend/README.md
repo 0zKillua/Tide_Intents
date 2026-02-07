@@ -1,73 +1,47 @@
-# React + TypeScript + Vite
+# <img src="public/assets/tide_logo.svg" width="40" height="40" alt="Tide Logo" /> Tide Protocol
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**An Intent Centric Lending Protocol on SUI.**
 
-Currently, two official plugins are available:
+![Tide Landing Page](public/assets/landing_hero.png)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Overview
 
-## React Compiler
+Tide Protocol revolutionizes DeFi lending by moving away from traditional pool-based models to a peer-to-peer, intent-centric architecture. By matching lenders and borrowers directly through off chain solvers, Tide eliminates spread and prevents socialized bad debt.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Liquidity that moves with the Tide.**
 
-## Expanding the ESLint configuration
+- **No Pools:** Direct matching between counterparties.
+- **No Bad Debt Socialization:** Your risk is isolated to your specific loans.
+- **Instant Execution:** Zero spread, highly efficient market matching.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Architecture
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Built on Sui's object-centric model, Tide leverages the speed and efficiency of the network to offer a seamless lending experience.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+![Tide Architecture](public/assets/architecture.png)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### Key Features
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Intent-Based Matching**: Lenders create `LendOffers` and borrowers create `BorrowRequests`. Our solver matches these intents atomically.
+- **DeepBook Integration**: Powered by DeepBook-V3 for atomic swaps, allowing borrowers to repay loans using their collateral directly and enabling efficient liquidations.
+- **Smart Collateral**: Utilizes the composability of Sui objects to ensure collateral is securely escrowed and managed.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔒 Security & Audit
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+> **Note:** The Move smart contracts powering Tide Protocol are currently being **audited and formally verified using the Certora Sui Prover**.
+
+We are committed to the highest standards of security. Our formal verification process ensures that core invariants of the protocol hold true under all conditions.
+
+## 📚 Documentation
+
+Detailed code documentation and developer guides will be released soon. Stay tuned for updates on our technical implementation and integration guides.
+
+## Tech Stack
+
+- **Frontend**: React, Vite, TypeScript, Tailwind CSS
+- **Blockchain**: Sui Network (Testnet)
+- **Integration**: @mysten/dapp-kit, DeepBook V3
+
+---
+
+© 2026 Tide Protocol. Built on Sui.
