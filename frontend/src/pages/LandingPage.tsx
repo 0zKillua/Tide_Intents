@@ -207,7 +207,7 @@ export function LandingPage() {
       </div>
       
       <footer className="py-6 text-center text-slate-500 text-sm bg-[#0a0c10] border-t border-slate-800">
-        &copy; 2026 Tide Protocol. Built on Sui.
+        &copy; 2026 Tide Protocol. Built on Sui. <span className="mx-2">|</span> <a href="https://x.com/0x158_" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-400 transition-colors font-semibold">Built by Killua</a>
       </footer>
     </div>
   );

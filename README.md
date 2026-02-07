@@ -44,4 +44,4 @@ Detailed code documentation and developer guides will be released soon. Stay tun
 
 ---
 
-© 2026 Tide Protocol. Built on Sui.
+© 2026 Tide Protocol. Built on Sui. | [Built by Killua](https://x.com/0x158_)
