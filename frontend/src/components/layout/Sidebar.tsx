@@ -85,11 +85,11 @@ export function Sidebar() {
                  <div className="flex flex-col">
                      <span className="text-xs text-gray-400 font-medium">Wallet Status</span>
                      <div className="h-1.5 w-16 bg-gray-800 rounded-full mt-1 overflow-hidden">
-                         <div className="h-full w-full bg-success/80 animate-pulse" />
+                         <div className="h-full w-full bg-primary/80 animate-pulse" />
                      </div>
                  </div>
              </div>
-             <ConnectButton className="!w-full !rounded-lg !bg-secondary !border-0 !text-white hover:!bg-secondary/80 transition-all !font-medium !text-sm !h-10 shadow-[0_4px_12px_rgba(41,121,255,0.2)]" />
+             <ConnectButton className="!w-full !rounded-lg !bg-secondary !border-0 !text-white hover:!bg-secondary/80 transition-all !font-medium !text-sm !h-10 shadow-[0_4px_12px_rgba(41,98,255,0.2)]" />
         </div>
 
         <button className="flex items-center gap-3 px-3 py-2 w-full text-sm font-medium text-gray-400 hover:text-white transition-colors group">

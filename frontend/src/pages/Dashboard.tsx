@@ -78,7 +78,7 @@ export function Dashboard() {
                                     <div className="flex items-center gap-2 text-sm text-blue-100/80">
                                         <span>Tick Size: 0.000000001</span>
                                         <span>•</span>
-                                        <span className="flex items-center gap-1 text-green-300"><div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" /> Live</span>
+                                        <span className="flex items-center gap-1 text-blue-300"><div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" /> Live</span>
                                     </div>
                                 </div>
                             </div>
@@ -129,13 +129,13 @@ export function Dashboard() {
 
       {/* Summary Stats */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-l-4 border-l-success">
+        <Card className="border-l-4 border-l-primary/50">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-400">Active Offers</CardTitle>
-            <Activity className="h-4 w-4 text-success" />
+            <Activity className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{activeLendOffers.length}</div>
+            <div className="text-2xl font-bold text-primary">{activeLendOffers.length}</div>
             <p className="text-xs text-gray-400">Waiting for borrowers</p>
           </CardContent>
         </Card>
@@ -248,7 +248,7 @@ export function Dashboard() {
                   return (
                   <TableRow key={obj.objectId}>
                     <TableCell className="font-mono text-xs">{fields.provider.slice(0, 6)}...{fields.provider.slice(-4)}</TableCell>
-                    <TableCell className="font-bold text-success">{formatUSD(principalVal)} USDC</TableCell>
+                    <TableCell className="font-bold text-primary">{formatUSD(principalVal)} USDC</TableCell>
                     <TableCell>{rate}%</TableCell>
                     <TableCell>{ltv}%</TableCell>
                     <TableCell>Max {fields.max_duration_ms} ms</TableCell>

@@ -53,21 +53,21 @@ export function InteractiveProtocolFlow() {
   const step = FLOW_STEPS[activeStep];
 
   return (
-    <section className="py-24 px-4 bg-[#02040A] relative overflow-hidden">
+    <section className="py-24 px-4 bg-slate-50 relative overflow-hidden">
       
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
-          <div className="absolute bottom-[20%] right-[10%] w-[600px] h-[600px] bg-secondary/5 blur-[100px] rounded-full" />
+          <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-blue-200/20 blur-[120px] rounded-full mix-blend-multiply" />
+          <div className="absolute bottom-[20%] right-[10%] w-[600px] h-[600px] bg-cyan-200/20 blur-[100px] rounded-full mix-blend-multiply" />
       </div>
 
       <div className="max-w-7xl mx-auto relative z-10 flex flex-col lg:flex-row gap-16 items-center">
         
         <div className="flex-1 space-y-8 max-w-xl">
            <div>
-               <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
-                 How <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Tide</span> Works
+               <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 leading-tight">
+                 How <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Tide</span> Works
                </h2>
-               <p className="text-gray-400 text-lg leading-relaxed">
+               <p className="text-slate-500 text-lg leading-relaxed">
                  A fully on-chain intent execution layer. Experience instant matching and smart collateral management.
                </p>
            </div>
@@ -80,19 +80,19 @@ export function InteractiveProtocolFlow() {
                  className={cn(
                    "w-full text-left p-5 rounded-2xl border transition-all duration-300 relative overflow-hidden group",
                    activeStep === idx 
-                     ? "bg-white/5 border-primary/50 shadow-[0_0_20px_rgba(0,242,234,0.15)]" 
-                     : "bg-transparent border-white/5 hover:bg-white/5"
+                     ? "bg-white border-blue-500/30 shadow-[0_4px_20px_rgba(59,130,246,0.1)]" 
+                     : "bg-transparent border-slate-200 hover:bg-slate-100"
                  )}
                >
                  <div className="flex items-center gap-5 relative z-10">
                     <div className={cn(
                         "w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border transition-colors shrink-0",
-                        activeStep === idx ? "bg-primary text-black border-primary" : "bg-transparent text-gray-500 border-gray-700"
+                        activeStep === idx ? "bg-blue-600 text-white border-blue-600" : "bg-slate-100 text-slate-500 border-slate-200"
                     )}>
                         {idx + 1}
                     </div>
                     <div>
-                        <h3 className={cn("font-bold text-lg transition-colors", activeStep === idx ? "text-white" : "text-gray-400 group-hover:text-gray-300")}>
+                        <h3 className={cn("font-bold text-lg transition-colors", activeStep === idx ? "text-slate-900" : "text-slate-500 group-hover:text-slate-700")}>
                             {s.label}
                         </h3>
                     </div>
@@ -112,7 +112,7 @@ export function InteractiveProtocolFlow() {
         </div>
 
         <div className="flex-1 w-full flex justify-center lg:justify-end">
-            <div className="relative w-full max-w-[650px] aspect-[4/3] bg-surface/20 rounded-[32px] border border-white/10 backdrop-blur-2xl p-6 shadow-2xl flex flex-col">
+            <div className="relative w-full max-w-[650px] aspect-[4/3] bg-white/50 rounded-[32px] border border-white/40 backdrop-blur-xl p-6 shadow-2xl flex flex-col">
                  
                  {/* Top Info Card */}
                  <div className="relative z-20 mb-4 h-16">
@@ -123,13 +123,13 @@ export function InteractiveProtocolFlow() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: 5 }}
                             transition={{ duration: 0.2 }}
-                            className="px-5 py-3 rounded-xl bg-[#0A0C14]/90 border border-white/10 shadow-lg backdrop-blur-md inline-block max-w-md"
+                            className="px-5 py-3 rounded-xl bg-white/90 border border-slate-200 shadow-lg backdrop-blur-md inline-block max-w-md"
                          >
-                            <div className="flex items-center gap-2 mb-1 text-primary text-[10px] font-mono uppercase tracking-widest">
+                            <div className="flex items-center gap-2 mb-1 text-blue-600 text-[10px] font-mono uppercase tracking-widest">
                                 <Zap className="w-3 h-3" />
                                 {step.label}
                             </div>
-                            <p className="text-gray-200 text-sm leading-snug">
+                            <p className="text-slate-600 text-sm leading-snug">
                                 {step.description}
                             </p>
                          </motion.div>
@@ -162,9 +162,9 @@ function ProtocolGraph({ activeStep }: { activeStep: number }) {
         <svg className="w-full h-full" viewBox="0 0 350 300" preserveAspectRatio="xMidYMid meet">
             <defs>
                 <linearGradient id="grad-line" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#00F2EA" stopOpacity="0" />
-                    <stop offset="50%" stopColor="#00F2EA" />
-                    <stop offset="100%" stopColor="#00F2EA" stopOpacity="0" />
+                    <stop offset="0%" stopColor="#190de3" stopOpacity="0" />
+                    <stop offset="50%" stopColor="#190de3" />
+                    <stop offset="100%" stopColor="#190de3" stopOpacity="0" />
                 </linearGradient>
                 <filter id="glow">
                     <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -276,7 +276,7 @@ function Connection({ start, end, isActive, direction }: any) {
 
     return (
         <g>
-            <path d={pathD} stroke="rgba(255,255,255,0.05)" strokeWidth="2" fill="none" />
+            <path d={pathD} stroke="rgba(0,0,0,0.1)" strokeWidth="2" fill="none" />
             {isActive && (
                 <motion.path
                     d={pathD}
@@ -301,9 +301,9 @@ function GraphNode({ x, y, icon: Icon, label, subLabel, isActive, size = "normal
                 <motion.div 
                     animate={{ 
                         scale: isActive ? 1.1 : 1,
-                        borderColor: isActive ? (highlightColor ? "rgba(96, 165, 250, 0.8)" : "rgba(0, 242, 234, 0.8)") : "rgba(255,255,255,0.1)",
-                        backgroundColor: isActive ? (highlightColor ? "rgba(30, 64, 175, 0.2)" : "rgba(0, 242, 234, 0.1)") : "rgba(0,0,0,0.5)",
-                        boxShadow: isActive ? (highlightColor ? "0 0 20px rgba(59,130,246,0.3)" : "0 0 20px rgba(0,242,234,0.3)") : "none"
+                        borderColor: isActive ? (highlightColor ? "rgba(37, 99, 235, 0.8)" : "rgba(37, 99, 235, 0.8)") : "rgba(0,0,0,0.1)",
+                        backgroundColor: isActive ? (highlightColor ? "rgba(219, 234, 254, 0.8)" : "rgba(219, 234, 254, 0.8)") : "rgba(255,255,255,0.8)",
+                        boxShadow: isActive ? (highlightColor ? "0 0 20px rgba(37, 99, 235, 0.2)" : "0 0 20px rgba(37, 99, 235, 0.2)") : "none"
                     }}
                     className={cn(
                         "rounded-full border backdrop-blur-md flex items-center justify-center transition-all duration-500",
@@ -319,7 +319,7 @@ function GraphNode({ x, y, icon: Icon, label, subLabel, isActive, size = "normal
                 <div className="mt-3 text-center">
                     <p className={cn(
                         "text-[11px] font-bold uppercase tracking-wider transition-colors duration-300", 
-                        isActive ? "text-white" : "text-gray-600"
+                        isActive ? "text-blue-900" : "text-slate-400"
                     )}>
                         {label}
                     </p>

@@ -110,7 +110,7 @@ export function Faucet() {
         </div>
       </CardHeader>
       <CardContent className="flex gap-4">
-        <Button variant="outline" onClick={mintUSDC} disabled={!isLocal}>
+        <Button variant="default" className="!bg-primary !text-white" onClick={mintUSDC} disabled={!isLocal}>
           Mint 1,000 USDC
         </Button>
       </CardContent>
