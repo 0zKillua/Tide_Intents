@@ -56,7 +56,7 @@ export function Dashboard() {
                      <div className="flex items-center justify-between">
                         <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3">
                             <div className="bg-white p-1.5 rounded-lg shadow-sm">
-                               <Activity className="text-blue-600 w-6 h-6" />
+                               <Activity className="text-primary w-6 h-6" />
                             </div>
                             Active Markets
                         </h2>
@@ -253,7 +253,7 @@ export function Dashboard() {
                     <TableCell>{ltv}%</TableCell>
                     <TableCell>Max {fields.max_duration_ms} ms</TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="secondary">Borrow</Button>
+                      <Button size="sm" variant="default">Borrow</Button>
                     </TableCell>
                   </TableRow>
                   );

@@ -268,7 +268,7 @@ export function RepayModal({ isOpen, onClose, loan }: RepayModalProps) {
                 onClick={() => setUseCollateral(true)}
                 className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
                   useCollateral 
-                    ? 'bg-secondary text-black' 
+                    ? 'bg-primary text-white' 
                     : 'text-gray-400 hover:text-white'
                 }`}
               >
@@ -317,7 +317,7 @@ export function RepayModal({ isOpen, onClose, loan }: RepayModalProps) {
         </CardContent>
         <CardFooter>
             <Button 
-              className={`w-full ${useCollateral ? 'bg-secondary' : 'bg-primary'} text-black hover:opacity-90`} 
+              className={`w-full bg-primary text-white hover:opacity-90`} 
               onClick={handleRepay} 
               disabled={txStatus !== "idle"}
             >

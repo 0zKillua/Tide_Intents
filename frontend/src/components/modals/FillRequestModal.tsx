@@ -225,7 +225,7 @@ export function FillRequestModal({ isOpen, onClose, data, type }: FillRequestMod
           </div>
         </CardContent>
         <CardFooter>
-           <Button className="w-full bg-secondary text-white" onClick={handleConfirm} disabled={txStatus !== "idle"}>
+           <Button className="w-full bg-primary text-white" onClick={handleConfirm} disabled={txStatus !== "idle"}>
              {txStatus === "pending" ? <Loader2 className="animate-spin" /> : "Confirm Transaction"}
            </Button>
         </CardFooter>

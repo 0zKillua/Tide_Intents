@@ -10,9 +10,9 @@ export default {
         background: '#02040A', // Midnight Depth
         surface: '#0D111C',    // Abyssal Plain
         'surface-hover': '#1A2235',
-        primary: '#190de3',    // Bright Blue
+        primary: '#2563eb',    // Bright Blue (blue-600)
         secondary: '#00B0FF',  // Lighter Blue Accent
-        success: '#190de3',    // Unified Blue (was Green)
+        success: '#10b981',    // Emerald Green (emerald-500)
         warning: '#FEB019',    // Alert Amber
         error: '#FF4560',      // Liquidate Red
       },

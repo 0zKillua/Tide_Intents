@@ -104,7 +104,7 @@ export function LandingPage() {
       <nav className="absolute top-0 w-full h-20 px-6 flex items-center justify-between z-50 bg-transparent">
         <div className="flex items-center gap-3">
         <div className="flex items-center gap-3">
-             <TideLogo size={40} className="shadow-[0_0_20px_rgba(59,130,246,0.3)] text-blue-600" />
+             <TideLogo size={40} className="shadow-[0_0_20px_rgba(59,130,246,0.3)] text-primary" />
             <span className="text-xl font-bold tracking-tight text-slate-900 drop-shadow-sm">
               Tide
             </span>
@@ -116,7 +116,7 @@ export function LandingPage() {
              Live on Sui Testnet
           </div>
           <Link to="/dashboard">
-            <Button className="bg-blue-600 text-white hover:bg-blue-700 font-bold shadow-lg shadow-blue-600/20 transition-all hover:scale-105 border-none">
+            <Button className="bg-primary text-white hover:bg-blue-700 font-bold shadow-lg shadow-blue-600/20 transition-all hover:scale-105 border-none">
               Launch App
             </Button>
           </Link>
@@ -181,7 +181,7 @@ export function LandingPage() {
           
           <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-4">
             <Link to="/dashboard">
-              <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all hover:scale-105 font-bold">
+              <Button size="lg" className="h-14 px-8 text-lg rounded-full bg-primary text-white hover:bg-blue-700 shadow-xl shadow-blue-600/20 transition-all hover:scale-105 font-bold">
                 Launch App <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>

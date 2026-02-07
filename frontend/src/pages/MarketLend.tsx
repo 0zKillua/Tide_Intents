@@ -55,7 +55,7 @@ export function MarketLend() {
         </div>
         <div className="flex items-center gap-2">
           <Button
-            className="bg-primary text-black hover:bg-primary/90 gap-2"
+            className="bg-primary text-white hover:bg-primary/90 gap-2"
             onClick={() => setIsCreateOpen(true)}
           >
             <Plus className="h-4 w-4" /> Create Offer

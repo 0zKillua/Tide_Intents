@@ -214,7 +214,7 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
                   variant={selectedToken === token ? "default" : "outline"}
                   size="sm"
                   onClick={() => setSelectedToken(token)}
-                  className={selectedToken === token ? "bg-primary text-black" : ""}
+                  className={selectedToken === token ? "bg-primary text-white" : ""}
                 >
                   {token}
                 </Button>
@@ -331,7 +331,7 @@ export function CreateIntentModal({ isOpen, onClose, type }: CreateIntentModalPr
         <CardFooter className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
           <Button 
-            className="bg-primary text-black hover:bg-primary/90 w-full" 
+            className="bg-primary text-white hover:bg-primary/90 w-full" 
             onClick={handlePost} 
             disabled={txStatus !== "idle" || (type === 'Lend' ? !principalAmount : (!principalAmount || !collateralAmount))}
           >

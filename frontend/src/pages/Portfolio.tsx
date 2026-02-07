@@ -365,7 +365,7 @@ export function Portfolio() {
                                         <TableCell className="text-warning">{rate.toFixed(2)}%</TableCell>
                                         <TableCell className="text-gray-400">{date.toLocaleDateString()}</TableCell>
                                         <TableCell className="text-right">
-                                            <Button size="sm" className="bg-primary text-black hover:bg-primary/90" onClick={() => setSelectedLoan(loan)}>Repay Loan</Button>
+                                            <Button size="sm" className="bg-primary text-white hover:bg-primary/90" onClick={() => setSelectedLoan(loan)}>Repay Loan</Button>
                                         </TableCell>
                                     </TableRow>
                                 );
@@ -405,18 +405,18 @@ export function Portfolio() {
                                 const getStatusBadge = () => {
                                     if (loanState === 1) return <Badge className="bg-success/20 text-success">Repaid</Badge>;
                                     if (loanState === 2) return <Badge className="bg-red-500/20 text-red-400">Liquidated</Badge>;
-                                    return <Badge variant="outline" className="text-gray-400">Active</Badge>;
+                                    return <Badge className="bg-success/20 text-success">Active</Badge>;
                                 };
                                 
                                 return (
                                     <TableRow key={note.objectId}>
                                         <TableCell className="font-bold text-white">{principal.toLocaleString()} USDC</TableCell>
-                                        <TableCell className="text-success">{rate.toFixed(2)}%</TableCell>
+                                        <TableCell className="text-warning">{rate.toFixed(2)}%</TableCell>
                                         <TableCell className="font-mono text-xs text-gray-500">{typeof loanId === 'string' ? loanId.slice(0, 8) : '...' }...</TableCell>
                                         <TableCell>{getStatusBadge()}</TableCell>
                                         <TableCell className="text-right">
                                             {loanState >= 1 ? (
-                                                <Button size="sm" className="bg-success text-black hover:bg-success/90" onClick={() => setSelectedClaimNote(note)}>Claim</Button>
+                                                <Button size="sm" className="bg-success text-white hover:bg-success/90" onClick={() => setSelectedClaimNote(note)}>Claim</Button>
                                             ) : (
                                                 <Button size="sm" variant="secondary" disabled>Wait for Repay</Button>
                                             )}

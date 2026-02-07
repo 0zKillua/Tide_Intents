@@ -24,7 +24,7 @@ export function MarketBorrow() {
            <p className="text-gray-400">Access liquidity by posting collateral instantly.</p>
         </div>
         <div className="flex items-center gap-2">
-           <Button className="bg-secondary text-white hover:bg-secondary/90 gap-2" onClick={() => setIsCreateOpen(true)}>
+           <Button className="bg-primary text-white hover:bg-primary/90 gap-2" onClick={() => setIsCreateOpen(true)}>
              <Plus className="h-4 w-4" /> Create Request
            </Button>
         </div>
@@ -86,7 +86,7 @@ export function MarketBorrow() {
                  <TableCell className="text-warning font-mono">{rate.toFixed(2)}%</TableCell>
                  <TableCell>{days}d</TableCell>
                  <TableCell className="text-right">
-                    <Button size="sm" variant="secondary" onClick={() => setSelectedOffer(obj)}>
+                    <Button size="sm" variant="default" onClick={() => setSelectedOffer(obj)}>
                       Borrow
                     </Button>
                  </TableCell>
