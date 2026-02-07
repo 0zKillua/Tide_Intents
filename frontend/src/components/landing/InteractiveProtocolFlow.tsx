@@ -5,7 +5,6 @@ import {
   FileCode, 
   Server, 
   Database, 
-  ArrowRight,
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";

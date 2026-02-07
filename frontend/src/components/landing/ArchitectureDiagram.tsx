@@ -1,9 +1,5 @@
-import React from 'react';
 import { 
-  Waves, 
-  User, 
   Zap, 
-  FileText, 
   Coins, 
   Lock, 
   ShieldCheck,
