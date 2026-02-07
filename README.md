@@ -1,8 +1,8 @@
-# <img src="public/assets/tide_logo.svg" width="40" height="40" alt="Tide Logo" /> Tide Protocol
+# <img src="frontend/public/assets/tide_logo.svg" width="40" height="40" alt="Tide Logo" /> Tide Protocol
 
 **An Intent Centric Lending Protocol on SUI.**
 
-![Tide Landing Page](public/assets/landing_hero.png)
+![Tide Landing Page](frontend/public/assets/landing_hero.png)
 
 ## Overview
 
@@ -18,7 +18,7 @@ Tide Protocol revolutionizes DeFi lending by moving away from traditional pool-b
 
 Built on Sui's object-centric model, Tide leverages the speed and efficiency of the network to offer a seamless lending experience.
 
-![Tide Architecture](public/assets/architecture.png)
+![Tide Architecture](frontend/public/assets/architecture.png)
 
 ### Key Features
 
