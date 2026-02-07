@@ -64,7 +64,10 @@ const Typewriter = ({ texts }: { texts: string[] }) => {
 
 export function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50 selection:bg-cyan-200/50 text-slate-900 relative overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-[#0a0c10] selection:bg-cyan-200/50 text-slate-900 relative overflow-x-hidden">
+        
+      {/* Light Theme Section Wrapper (Navbar + Hero) */}
+      <div className="bg-slate-50 relative pb-20">
        
         {/* Left Side - Subtle Light Gradient */ }
         <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white via-blue-50/50 to-white pointer-events-none z-0" />
@@ -163,7 +166,7 @@ export function LandingPage() {
 
           {/* Static Subtitle */}
           <p className="text-xl md:text-2xl font-light text-slate-600 tracking-wider mb-6">
-             An Intent Centric Lending Protocol.
+             An Intent Centric Lending Protocol on SUI.
           </p>
 
           <div className="min-h-[80px] mb-8 max-w-3xl text-left relative z-10 flex items-center">
@@ -171,7 +174,8 @@ export function LandingPage() {
                 "Match directly with lenders and borrowers.",
                 "Zero spread. Instant execution.",
                 "Smart collateral. A loan that repays itself.",
-                "Turbo charged with Deepbook."
+                "Turbo charged with Deepbook.",
+                "No Pools, No Bad debt Socialization."
              ]} />
           </div>
           
@@ -190,6 +194,7 @@ export function LandingPage() {
 
 
       </section>
+      </div> {/* End of Light Theme Section Wrapper */}
 
       {/* Live Ticker - Light Section */}
       <div className="w-full bg-black border-t border-slate-200 relative z-20">
@@ -201,8 +206,8 @@ export function LandingPage() {
         <ArchitectureDiagram />
       </div>
       
-      <footer className="py-8 text-center text-slate-500 text-sm bg-slate-50 border-t border-slate-200">
-        © 2026 Tide Protocol. Built on Sui.
+      <footer className="py-6 text-center text-slate-500 text-sm bg-[#0a0c10] border-t border-slate-800">
+        &copy; 2026 Tide Protocol. Built on Sui.
       </footer>
     </div>
   );
